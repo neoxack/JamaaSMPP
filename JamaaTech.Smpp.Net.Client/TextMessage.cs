@@ -76,11 +76,11 @@ namespace JamaaTech.Smpp.Net.Client
             // We check vText Length first
             if (vText.Length > vMaxMessageLength && bytes.Length > vMaxMessageLength) // Split into multiple!
             {
-                var SegID = new Random().Next(1000, 9999); // create random SegmentID
+                var segId = new Random().Next(1000, 9999); // create random SegmentID
                 vMaxMessageLength = GetMaxMessageLength(defaultEncoding, true);
                 var messages = Split(vText, vMaxMessageLength);
                 var totalSegments = messages.Count; // get the number of (how many) parts
-                var udh = new Udh(SegID, totalSegments, 0); // ID, Total, part
+                var udh = new Udh(segId, totalSegments, 0); // ID, Total, part
 
                 for (int i = 0; i < totalSegments; i++)
                 {

@@ -34,6 +34,7 @@ namespace JamaaTech.Smpp.Net.Client
         protected int vSegmentID;
         protected int vSequenceNumber;
         protected bool vRegisterDeliveryNotification;
+        protected string vMessageId;
         #endregion
 
         #region Constructors
@@ -70,6 +71,12 @@ namespace JamaaTech.Smpp.Net.Client
         {
             get { return vDestinatinoAddress; }
             set { vDestinatinoAddress = value; }
+        }
+
+        public string MessageId
+        {
+            get { return vMessageId; }
+            set { vMessageId = value; }
         }
 
         /// <summary>

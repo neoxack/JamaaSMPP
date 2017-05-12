@@ -19,6 +19,7 @@ using System.Threading;
 using System.Diagnostics;
 using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Protocol;
+using JamaaTech.Smpp.Net.Lib.Protocol.Tlv;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Client
@@ -166,13 +167,21 @@ namespace JamaaTech.Smpp.Net.Client
             if (vState != SmppConnectionState.Connected)
             { throw new SmppClientException("Sending message operation failed because the SmppClient is not connected"); }
 
+            string messageId = null;
             foreach (SendSmPDU pdu in message.GetMessagePDUs(vProperties.DefaultEncoding))
             {
                 ResponsePDU resp = vTrans.SendPdu(pdu, timeOut);
                 if (resp.Header.ErrorCode != SmppErrorCode.ESME_ROK)
                 { throw new SmppException(resp.Header.ErrorCode); }
-                RaiseMessageSentEvent(message);
+
+                var submitSmResp = resp as SubmitSmResp;
+                if (submitSmResp != null)
+                {
+                    messageId = ((SubmitSmResp)resp).MessageID;
+                }
+                message.MessageId = messageId;            
             }
+            RaiseMessageSentEvent(message);
         }
 
         /// <summary>
@@ -498,11 +507,21 @@ namespace JamaaTech.Smpp.Net.Client
                 return;
             }
             //If we have just a normal message
-            if ((((byte)pdu.EsmClass) | 0xc3) == 0xc3)
+            if (((byte)pdu.EsmClass | 0xc3) == 0xc3)
             { RaiseMessageReceivedEvent(message); }
             //Or if we have received a delivery receipt
             else if ((pdu.EsmClass & EsmClass.DeliveryReceipt) == EsmClass.DeliveryReceipt)
-            { RaiseMessageDeliveredEvent(message); }
+            {
+                // Extract receipted message id
+                var receiptedMessageIdTlv = pdu.Tlv.GetTlvByTag(Tag.receipted_message_id);
+                string receiptedMessageId = null;
+                if (receiptedMessageIdTlv != null)
+                {
+                    receiptedMessageId = SMPPEncodingUtil.GetCStringFromBytes(receiptedMessageIdTlv.RawValue);
+                }
+                message.MessageId = receiptedMessageId;
+                RaiseMessageDeliveredEvent(message);
+            }
         }
 
         private void SessionClosedEventHandler(object sender, SmppSessionClosedEventArgs e)
