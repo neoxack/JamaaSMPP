@@ -15,33 +15,33 @@
  ************************************************************************/
 
 using System;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 using JamaaTech.Smpp.Net.Lib.Protocol.Tlv;
 using JamaaTech.Smpp.Net.Lib.Util;
 
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     public class SmppClient : IDisposable
     {
         #region Variables
-        private SmppConnectionProperties vProperties;
+        private readonly SmppConnectionProperties vProperties;
         private SmppClientSession vTrans;
         private SmppClientSession vRecv;
         private Exception vLastException;
         private SmppConnectionState vState;
-        private object vConnSyncRoot;
-        private System.Threading.Timer vTimer;
+        private readonly object vConnSyncRoot;
+        private readonly System.Threading.Timer vTimer;
         private int vTimeOut;
         private int vAutoReconnectDelay;
         private string vName;
         private int vKeepAliveInterval;
-        private SendMessageCallBack vSendMessageCallBack;
+        private readonly SendMessageCallBack vSendMessageCallBack;
         private bool vStarted;
         //--
-        private static TraceSwitch vTraceSwitch = new TraceSwitch("SmppClientSwitch", "SmppClient trace switch");
+        private static readonly TraceSwitch vTraceSwitch = new TraceSwitch("SmppClientSwitch", "SmppClient trace switch");
         #endregion
 
         #region Events
@@ -53,7 +53,7 @@ namespace JamaaTech.Smpp.Net.Client
         /// <summary>
         /// Occurs when a message delivery notification is received
         /// </summary>
-        public event EventHandler<MessageEventArgs> MessageDelivered;
+        public event EventHandler<MessageDeliveredEventArgs> MessageDelivered;
 
         /// <summary>
         /// Occurs when connection state changes
@@ -447,9 +447,9 @@ namespace JamaaTech.Smpp.Net.Client
             if (MessageReceived != null) { MessageReceived(this, new MessageEventArgs(message)); }
         }
 
-        private void RaiseMessageDeliveredEvent(ShortMessage message)
+        private void RaiseMessageDeliveredEvent(string messageId)
         {
-            if (MessageDelivered != null) { MessageDelivered(this, new MessageEventArgs(message)); }
+            if (MessageDelivered != null) { MessageDelivered(this, new MessageDeliveredEventArgs(messageId)); }
         }
 
         private void RaiseMessageSentEvent(ShortMessage message)
@@ -478,37 +478,40 @@ namespace JamaaTech.Smpp.Net.Client
             //This handler is interested in SingleDestinationPDU only
             SingleDestinationPDU pdu = e.Request as SingleDestinationPDU;
             if (pdu == null) { return; }
-            ShortMessage message = null;
-            try { message = MessageFactory.CreateMessage(pdu); }
-            catch (SmppException smppEx)
-            {
-                if (vTraceSwitch.TraceError)
-                {
-                    Trace.WriteLine(string.Format(
-                        "200019:SMPP message decoding failure - {0} - {1} {2};",
-                        smppEx.ErrorCode, new ByteBuffer(pdu.GetBytes()).DumpString(), smppEx.Message));
-                }
-                //Notify the SMSC that we encountered an error while processing the message
-                e.Response = pdu.CreateDefaultResponce();
-                e.Response.Header.ErrorCode = smppEx.ErrorCode;
-                return;
-            }
-            catch(Exception ex)
-            {
-                if (vTraceSwitch.TraceError)
-                {
-                    Trace.WriteLine(string.Format(
-                        "200019:SMPP message decoding failure - {0} {1};",
-                        new ByteBuffer(pdu.GetBytes()).DumpString(), ex.Message));
-                }
-                //Let the receiver know that this message was rejected
-                e.Response = pdu.CreateDefaultResponce();
-                e.Response.Header.ErrorCode = SmppErrorCode.ESME_RX_P_APPN; //ESME Receiver Reject Message
-                return;
-            }
+            
             //If we have just a normal message
-            if (((byte)pdu.EsmClass | 0xc3) == 0xc3)
-            { RaiseMessageReceivedEvent(message); }
+            if (((byte) pdu.EsmClass | 0xc3) == 0xc3)
+            {
+                ShortMessage message = null;
+                try { message = MessageFactory.CreateMessage(pdu); }
+                catch (SmppException smppEx)
+                {
+                    if (vTraceSwitch.TraceError)
+                    {
+                        Trace.WriteLine(string.Format(
+                            "200019:SMPP message decoding failure - {0} - {1} {2};",
+                            smppEx.ErrorCode, new ByteBuffer(pdu.GetBytes()).DumpString(), smppEx.Message));
+                    }
+                    //Notify the SMSC that we encountered an error while processing the message
+                    e.Response = pdu.CreateDefaultResponce();
+                    e.Response.Header.ErrorCode = smppEx.ErrorCode;
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    if (vTraceSwitch.TraceError)
+                    {
+                        Trace.WriteLine(string.Format(
+                            "200019:SMPP message decoding failure - {0} {1};",
+                            new ByteBuffer(pdu.GetBytes()).DumpString(), ex.Message));
+                    }
+                    //Let the receiver know that this message was rejected
+                    e.Response = pdu.CreateDefaultResponce();
+                    e.Response.Header.ErrorCode = SmppErrorCode.ESME_RX_P_APPN; //ESME Receiver Reject Message
+                    return;
+                }
+                RaiseMessageReceivedEvent(message);
+            }
             //Or if we have received a delivery receipt
             else if ((pdu.EsmClass & EsmClass.DeliveryReceipt) == EsmClass.DeliveryReceipt)
             {
@@ -519,8 +522,7 @@ namespace JamaaTech.Smpp.Net.Client
                 {
                     receiptedMessageId = SMPPEncodingUtil.GetCStringFromBytes(receiptedMessageIdTlv.RawValue);
                 }
-                message.MessageId = receiptedMessageId;
-                RaiseMessageDeliveredEvent(message);
+                RaiseMessageDeliveredEvent(receiptedMessageId);
             }
         }
 

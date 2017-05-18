@@ -17,7 +17,7 @@
 using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     /// <summary>
     /// A factory class for constructing messages from PDUs

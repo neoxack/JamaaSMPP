@@ -14,13 +14,11 @@
  *
  ************************************************************************/
 
-using System;
-using System.Text;
 using System.Collections.Generic;
-using JamaaTech.Smpp.Net.Lib.Protocol;
 using JamaaTech.Smpp.Net.Lib;
+using JamaaTech.Smpp.Net.Lib.Protocol;
 
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     /// <summary>
     /// Defines a base class for diffent types of messages that can be used with <see cref="SmppClient"/>

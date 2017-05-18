@@ -1,8 +1,8 @@
-﻿using JamaaTech.Smpp.Net.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Jamaa.Smpp.Net.Client;
 
 namespace DemoClient
 {
@@ -60,7 +60,7 @@ namespace DemoClient
             client.ConnectionStateChanged += new EventHandler<ConnectionStateChangedEventArgs>(client_ConnectionStateChanged);
             client.StateChanged += new EventHandler<StateChangedEventArgs>(client_StateChanged);
             client.MessageSent += new EventHandler<MessageEventArgs>(client_MessageSent);
-            client.MessageDelivered += new EventHandler<MessageEventArgs>(client_MessageDelivered);
+            client.MessageDelivered += new EventHandler<MessageDeliveredEventArgs>(client_MessageDelivered);
             client.MessageReceived += new EventHandler<MessageEventArgs>(client_MessageReceived);
 
             SmppConnectionProperties properties = client.Properties;
@@ -122,10 +122,10 @@ namespace DemoClient
             // CANDO: save sent sms
         }
 
-        private static void client_MessageDelivered(object sender, MessageEventArgs e)
+        private static void client_MessageDelivered(object sender, MessageDeliveredEventArgs e)
         {
             var client = (SmppClient)sender;
-            Console.WriteLine("SMPP client {0} Message Delivered to: {1}", client.Name, e.ShortMessage.DestinationAddress);
+            Console.WriteLine("SMPP client {0} MessageId: {1}", client.Name, e.MessageId);
 
             // CANDO: save delivered sms
         }

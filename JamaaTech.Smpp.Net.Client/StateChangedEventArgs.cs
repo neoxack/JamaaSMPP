@@ -15,10 +15,8 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     /// <summary>
     /// Provides data for <see cref="SmppClient.StateChanged"/> event

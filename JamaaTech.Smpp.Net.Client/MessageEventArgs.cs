@@ -15,10 +15,8 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     /// <summary>
     /// Provides data for <see cref="SmppClient.MessageReceived"/>, <see cref="SmppClient.MessageDelivered"/> and <see cref="SmppClient.MessageSent"/> events
@@ -26,7 +24,7 @@ namespace JamaaTech.Smpp.Net.Client
     public class MessageEventArgs : EventArgs
     {
         #region Variables
-        private ShortMessage vShortMessage;
+        private readonly ShortMessage vShortMessage;
         #endregion
 
         #region Constructors

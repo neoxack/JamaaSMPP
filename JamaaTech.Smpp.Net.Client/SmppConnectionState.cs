@@ -14,11 +14,7 @@
  *
  ************************************************************************/
 
-using System;
-using System.Text;
-using System.Collections.Generic;
-
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     /// <summary>
     /// Represent <see cref="SmppClient"/> connection state

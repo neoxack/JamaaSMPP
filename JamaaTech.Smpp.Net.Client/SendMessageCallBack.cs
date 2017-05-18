@@ -15,7 +15,7 @@
  ************************************************************************/
 
 
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     /// <summary>
     /// A delegate used for asynchorous send message operations

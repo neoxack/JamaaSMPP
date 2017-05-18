@@ -15,11 +15,9 @@
  ************************************************************************/
 
 using System;
-using System.Text;
-using System.Collections.Generic;
 using JamaaTech.Smpp.Net.Lib;
 
-namespace JamaaTech.Smpp.Net.Client
+namespace Jamaa.Smpp.Net.Client
 {
     /// <summary>
     /// Represents SMPP connection properties

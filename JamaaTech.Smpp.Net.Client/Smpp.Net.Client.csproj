@@ -8,7 +8,7 @@
     <ProjectGuid>{1578A5AA-1DC1-42C6-AFF5-0EB278960881}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Smpp.Net.Client</RootNamespace>
+    <RootNamespace>Jamaa.Smpp.Net.Client</RootNamespace>
     <AssemblyName>JamaaTech.Smpp.Net.Client</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionStateChangedEventArgs.cs" />
+    <Compile Include="MessageDeliveredEventArgs.cs" />
     <Compile Include="MessageEventArgs.cs" />
     <Compile Include="MessageFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
