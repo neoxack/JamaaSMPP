@@ -14,42 +14,32 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class Unbind : GenericRequestPDU
+    public class Unbind : GenericRequestPdu
     {
         #region Constructors
-        internal Unbind(PDUHeader header)
+        internal Unbind(PduHeader header)
             : base(header) { }
 
         public Unbind()
-            : base(new PDUHeader(CommandType.UnBind))
+            : base(new PduHeader(CommandType.UnBind))
         {
         }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.Any; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Any;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transceiver; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transceiver;
+
         #endregion
 
         #region Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
-            PDUHeader header = new PDUHeader(CommandType.UnBindResp,vHeader.SequenceNumber);
-            UnbindResp resp = (UnbindResp)CreatePDU(header);
+            PduHeader header = new PduHeader(CommandType.UnBindResp,VHeader.SequenceNumber);
+            UnbindResp resp = (UnbindResp)CreatePdu(header);
             return resp;
         }
         #endregion

@@ -15,56 +15,43 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
-    public class PDUErrorEventArgs : EventArgs
+    public class PduErrorEventArgs : EventArgs
     {
         #region Variable
-        private PDUException vException;
-        private byte[] vByteDump;
-        private PDUHeader vHeader;
-        private PDU vPdu;
+        private readonly PduException _vException;
+        private readonly byte[] _vByteDump;
+        private readonly PduHeader _vHeader;
+        private readonly Pdu _vPdu;
         #endregion
 
         #region Constructors
-        public PDUErrorEventArgs(PDUException exception, byte[] byteDump, PDUHeader header)
+        public PduErrorEventArgs(PduException exception, byte[] byteDump, PduHeader header)
         {
-            vException = exception;
-            vByteDump = byteDump;
-            vHeader = header;
+            _vException = exception;
+            _vByteDump = byteDump;
+            _vHeader = header;
         }
 
-        public PDUErrorEventArgs(PDUException exception, byte[] byteDump, PDUHeader header, PDU pdu)
+        public PduErrorEventArgs(PduException exception, byte[] byteDump, PduHeader header, Pdu pdu)
             :this(exception,byteDump,header)
         {
-            vPdu = pdu;
+            _vPdu = pdu;
         }
         #endregion
 
         #region Properties
-        public PDUException Exception
-        {
-            get { return vException; }
-        }
+        public PduException Exception => _vException;
 
-        public byte[] ByteDump
-        {
-            get { return vByteDump; }
-        }
+        public byte[] ByteDump => _vByteDump;
 
-        public PDUHeader Header
-        {
-            get { return vHeader; }
-        }
+        public PduHeader Header => _vHeader;
 
-        public PDU Pdu
-        {
-            get { return vPdu; }
-        }
+        public Pdu Pdu => _vPdu;
+
         #endregion
     }
 }

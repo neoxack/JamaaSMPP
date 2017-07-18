@@ -15,20 +15,17 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class NotEnoughBytesException : PDUException
+    public class NotEnoughBytesException : PduException
     {
         #region Constructors
         public NotEnoughBytesException(string message)
-            : base(SmppErrorCode.ESME_RINVCMDLEN, message) { }
+            : base(SmppErrorCode.EsmeRinvcmdlen, message) { }
 
         public NotEnoughBytesException(string messager, Exception innerException)
-            : base(SmppErrorCode.ESME_RINVCMDLEN,messager, innerException) { }
+            : base(SmppErrorCode.EsmeRinvcmdlen,messager, innerException) { }
         #endregion
     }
 }

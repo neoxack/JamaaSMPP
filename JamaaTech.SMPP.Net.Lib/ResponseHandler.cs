@@ -14,9 +14,7 @@
  *
  ************************************************************************/
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 using System.Threading;
 
@@ -25,80 +23,80 @@ namespace JamaaTech.Smpp.Net.Lib
     public class ResponseHandler
     {
         #region Variables
-        private int vDefaultResponseTimeout;
-        private List<ResponsePDU> vResponseQueue;
-        private List<PDUWaitContext> vWaitingQueue;
-        private AutoResetEvent vResponseEvent;
-        private AutoResetEvent vWaitingEvent;
+        private int _vDefaultResponseTimeout;
+        private readonly List<ResponsePdu> _vResponseQueue;
+        private readonly List<PduWaitContext> _vWaitingQueue;
+        private readonly AutoResetEvent _vResponseEvent;
+        private readonly AutoResetEvent _vWaitingEvent;
         #endregion
 
         #region Constructors
         public ResponseHandler()
         {
-            vDefaultResponseTimeout = 5000; //Five seconds
-            vWaitingQueue = new List<PDUWaitContext>(32);
-            vResponseQueue = new List<ResponsePDU>(32);
-            vResponseEvent = new AutoResetEvent(true);
-            vWaitingEvent = new AutoResetEvent(true);
+            _vDefaultResponseTimeout = 5000; //Five seconds
+            _vWaitingQueue = new List<PduWaitContext>(32);
+            _vResponseQueue = new List<ResponsePdu>(32);
+            _vResponseEvent = new AutoResetEvent(true);
+            _vWaitingEvent = new AutoResetEvent(true);
         }
         #endregion
 
         #region Properties
         public int DefaultResponseTimeout
         {
-            get { return vDefaultResponseTimeout; }
+            get { return _vDefaultResponseTimeout; }
             set
             {
                 int timeOut = 5000;
                 if (value > timeOut) { timeOut = value; }
-                Interlocked.Exchange(ref vDefaultResponseTimeout, timeOut);
+                Interlocked.Exchange(ref _vDefaultResponseTimeout, timeOut);
             }
         }
         public int Count
         {
-            get { lock (vResponseQueue) { return vResponseQueue.Count; } }
+            get { lock (_vResponseQueue) { return _vResponseQueue.Count; } }
         }
         #endregion
 
         #region Methods
         #region Interface Methods
-        public void Handle(ResponsePDU pdu)
+        public void Handle(ResponsePdu pdu)
         {
             AddResponse(pdu);
-            vWaitingEvent.WaitOne();
+            _vWaitingEvent.WaitOne();
             try
             {
                 uint sequenceNumber = pdu.Header.SequenceNumber;
-                for (int index = 0; index < vWaitingQueue.Count; ++index)
+                for (int index = 0; index < _vWaitingQueue.Count; ++index)
                 {
-                    PDUWaitContext waitContext = vWaitingQueue[index];
+                    PduWaitContext waitContext = _vWaitingQueue[index];
                     if (waitContext.SequenceNumber == sequenceNumber)
                     {
-                        vWaitingQueue.RemoveAt(index);
+                        _vWaitingQueue.RemoveAt(index);
                         waitContext.AlertResponseReceived();
                         if (waitContext.TimedOut) { FetchResponse(sequenceNumber); }
                         return;
                     }
                 }
             }
-            finally { vWaitingEvent.Set(); }
+            finally { _vWaitingEvent.Set(); }
         }
 
-        public ResponsePDU WaitResponse(RequestPDU pdu)
+        public ResponsePdu WaitResponse(RequestPdu pdu)
         {
-            return WaitResponse(pdu, vDefaultResponseTimeout);
+            return WaitResponse(pdu, _vDefaultResponseTimeout);
         }
 
-        public ResponsePDU WaitResponse(RequestPDU pdu, int timeOut)
+        public ResponsePdu WaitResponse(RequestPdu pdu, int timeOut)
         {
             uint sequenceNumber = pdu.Header.SequenceNumber;
-            ResponsePDU resp = FetchResponse(sequenceNumber);
+            ResponsePdu resp = FetchResponse(sequenceNumber);
             if (resp != null) { return resp; }
-            if (timeOut < 5000) { timeOut = vDefaultResponseTimeout; }
-            PDUWaitContext waitContext = new PDUWaitContext(sequenceNumber, timeOut);
-            vWaitingEvent.WaitOne();
-            try { vWaitingQueue.Add(waitContext); }
-            finally { vWaitingEvent.Set(); }
+            if (timeOut < 5000) { timeOut = _vDefaultResponseTimeout; }
+            PduWaitContext waitContext = new PduWaitContext(sequenceNumber, timeOut);
+            _vWaitingEvent.WaitOne();
+            try { _vWaitingQueue.Add(waitContext); }
+            finally { _vWaitingEvent.Set(); }
             waitContext.WaitForAlert();
             resp = FetchResponse(sequenceNumber);
             if (resp == null) { throw new SmppResponseTimedOutException(); }
@@ -107,30 +105,30 @@ namespace JamaaTech.Smpp.Net.Lib
         #endregion
 
         #region Helper Methods
-        private void AddResponse(ResponsePDU pdu)
+        private void AddResponse(ResponsePdu pdu)
         {
-            vResponseEvent.WaitOne();
-            try { vResponseQueue.Add(pdu); }
-            finally { vResponseEvent.Set(); }
+            _vResponseEvent.WaitOne();
+            try { _vResponseQueue.Add(pdu); }
+            finally { _vResponseEvent.Set(); }
         }
 
-        private ResponsePDU FetchResponse(uint sequenceNumber)
+        private ResponsePdu FetchResponse(uint sequenceNumber)
         {
-            vResponseEvent.WaitOne();
+            _vResponseEvent.WaitOne();
             try 
             {
-                for (int index = 0; index < vResponseQueue.Count; ++index)
+                for (int index = 0; index < _vResponseQueue.Count; ++index)
                 {
-                    ResponsePDU pdu = vResponseQueue[index];
+                    ResponsePdu pdu = _vResponseQueue[index];
                     if (pdu.Header.SequenceNumber == sequenceNumber)
                     {
-                        vResponseQueue.RemoveAt(index);
+                        _vResponseQueue.RemoveAt(index);
                         return pdu;
                     }
                 }
                 return null;
             }
-            finally { vResponseEvent.Set(); }
+            finally { _vResponseEvent.Set(); }
         }
         #endregion
         #endregion

@@ -14,31 +14,25 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class SmPDU : RequestPDU
+    public abstract class SmPdu : RequestPdu
     {
         #region Variables
-        protected SmppAddress vSourceAddress;
+        protected SmppAddress VSourceAddress;
         #endregion
 
         #region Constructors
-        internal SmPDU(PDUHeader header)
+        internal SmPdu(PduHeader header)
             : base(header)
         {
-            vSourceAddress = new SmppAddress();
+            VSourceAddress = new SmppAddress();
         }
         #endregion
 
         #region Properties
-        public SmppAddress SourceAddress
-        {
-            get { return vSourceAddress; }
-        }
+        public SmppAddress SourceAddress => VSourceAddress;
+
         #endregion
     }
 }

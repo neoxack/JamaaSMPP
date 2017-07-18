@@ -14,21 +14,16 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class TooManyBytesException : PDUException
+    public class TooManyBytesException : PduException
     {
         #region Constructors
         public TooManyBytesException()
-            : base(SmppErrorCode.ESME_RINVCMDLEN, "PDU encountered many bytes than expected") { }
+            : base(SmppErrorCode.EsmeRinvcmdlen, "PDU encountered many bytes than expected") { }
 
         public TooManyBytesException(string message)
-            : base(SmppErrorCode.ESME_RINVCMDLEN, message) { }
+            : base(SmppErrorCode.EsmeRinvcmdlen, message) { }
         #endregion
     }
 }

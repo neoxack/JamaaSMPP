@@ -15,114 +15,102 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class ReplaceSm : SmOperationPDU
+    public sealed class ReplaceSm : SmOperationPdu
     {
         #region Variables
-        private string vScheduleDeliveryTime;
-        private string vValidityPeriod;
-        private RegisteredDelivery vRegisteredDelivery;
-        private byte vSmDefaultMessageID;
-        private byte vSmLength;
-        private string vShortMessage;
+        private string _vScheduleDeliveryTime;
+        private string _vValidityPeriod;
+        private RegisteredDelivery _vRegisteredDelivery;
+        private byte _vSmDefaultMessageId;
+        private byte _vSmLength;
+        private string _vShortMessage;
         #endregion
 
         #region Constructors
         public ReplaceSm()
-            : base(new PDUHeader(CommandType.ReplaceSm))
+            : base(new PduHeader(CommandType.ReplaceSm))
         {
-            vScheduleDeliveryTime = "";
-            vValidityPeriod = "";
-            vRegisteredDelivery = RegisteredDelivery.None;
-            vSmDefaultMessageID = 0;
-            vShortMessage = "";
-            vSmLength = 0;
+            _vScheduleDeliveryTime = "";
+            _vValidityPeriod = "";
+            _vRegisteredDelivery = RegisteredDelivery.None;
+            _vSmDefaultMessageId = 0;
+            _vShortMessage = "";
+            _vSmLength = 0;
         }
 
-        public ReplaceSm(PDUHeader header)
+        public ReplaceSm(PduHeader header)
             : base(header)
         {
-             vScheduleDeliveryTime = "";
-            vValidityPeriod = "";
-            vRegisteredDelivery = RegisteredDelivery.None;
-            vSmDefaultMessageID = 0;
-            vShortMessage = "";
-            vSmLength = 0;
+             _vScheduleDeliveryTime = "";
+            _vValidityPeriod = "";
+            _vRegisteredDelivery = RegisteredDelivery.None;
+            _vSmDefaultMessageId = 0;
+            _vShortMessage = "";
+            _vSmLength = 0;
        }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.ESME; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Esme;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transmitter; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transmitter;
 
         public string ScheduleDeliveryTime
         {
-            get { return vScheduleDeliveryTime; }
-            set { vScheduleDeliveryTime = value; }
+            get { return _vScheduleDeliveryTime; }
+            set { _vScheduleDeliveryTime = value; }
         }
 
         public string ValidityPeriod
         {
-            get { return vValidityPeriod; }
-            set { vValidityPeriod = value; }
+            get { return _vValidityPeriod; }
+            set { _vValidityPeriod = value; }
         }
 
         public RegisteredDelivery RegisteredDelivery
         {
-            get { return vRegisteredDelivery; }
-            set { vRegisteredDelivery = value; }
+            get { return _vRegisteredDelivery; }
+            set { _vRegisteredDelivery = value; }
         }
 
-        public byte SmDefaultMessageID
+        public byte SmDefaultMessageId
         {
-            get { return vSmDefaultMessageID; }
-            set { vSmDefaultMessageID = value; }
+            get { return _vSmDefaultMessageId; }
+            set { _vSmDefaultMessageId = value; }
         }
 
-        public byte SmLength
-        {
-            get { return vSmLength; }
-        }
+        public byte SmLength => _vSmLength;
 
         public string ShortMessage
         {
-            get { return vShortMessage; }
-            set { vShortMessage = value; }
+            get { return _vShortMessage; }
+            set { _vShortMessage = value; }
         }
         #endregion
 
         #region Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
-            PDUHeader header = new PDUHeader(CommandType.ReplaceSm,vHeader.SequenceNumber);
+            PduHeader header = new PduHeader(CommandType.ReplaceSm,VHeader.SequenceNumber);
             return new ReplaceSmResp(header);
         }
 
         protected override byte[] GetBodyData()
         {
             ByteBuffer buffer = new ByteBuffer(64);
-            buffer.Append(EncodeCString(vMessageID));
-            buffer.Append(vSourceAddress.GetBytes());
-            buffer.Append(EncodeCString(vScheduleDeliveryTime));
-            buffer.Append(EncodeCString(vValidityPeriod));
-            buffer.Append((byte)vRegisteredDelivery);
-            buffer.Append((byte)vSmDefaultMessageID);
-            byte[] shortMessage = EncodeCString(vShortMessage);
-            vSmLength = (byte)shortMessage.Length;
-            buffer.Append((byte)vSmLength);
+            buffer.Append(EncodeCString(VMessageId));
+            buffer.Append(VSourceAddress.GetBytes());
+            buffer.Append(EncodeCString(_vScheduleDeliveryTime));
+            buffer.Append(EncodeCString(_vValidityPeriod));
+            buffer.Append((byte)_vRegisteredDelivery);
+            buffer.Append((byte)_vSmDefaultMessageId);
+            byte[] shortMessage = EncodeCString(_vShortMessage);
+            _vSmLength = (byte)shortMessage.Length;
+            buffer.Append((byte)_vSmLength);
             buffer.Append(shortMessage);
             return buffer.ToBytes();
        }
@@ -130,14 +118,14 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         protected override void Parse(ByteBuffer buffer)
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
-            vMessageID = DecodeCString(buffer);
-            vSourceAddress = SmppAddress.Parse(buffer);
-            vScheduleDeliveryTime = DecodeCString(buffer);
-            vValidityPeriod = DecodeCString(buffer);
-            vRegisteredDelivery = (RegisteredDelivery)GetByte(buffer);
-            vSmDefaultMessageID = GetByte(buffer);
-            vSmLength = GetByte(buffer);
-            vShortMessage = DecodeString(buffer, (int)vSmLength);
+            VMessageId = DecodeCString(buffer);
+            VSourceAddress = SmppAddress.Parse(buffer);
+            _vScheduleDeliveryTime = DecodeCString(buffer);
+            _vValidityPeriod = DecodeCString(buffer);
+            _vRegisteredDelivery = (RegisteredDelivery)GetByte(buffer);
+            _vSmDefaultMessageId = GetByte(buffer);
+            _vSmLength = GetByte(buffer);
+            _vShortMessage = DecodeString(buffer, (int)_vSmLength);
             //This pdu has no option parameters,
             //If there is something left in the buffer,
             //then we have more than required bytes

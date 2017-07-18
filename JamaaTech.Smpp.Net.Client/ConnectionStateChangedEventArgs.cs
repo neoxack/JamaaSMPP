@@ -24,9 +24,9 @@ namespace Jamaa.Smpp.Net.Client
     public class ConnectionStateChangedEventArgs : EventArgs
     {
         #region Variables
-        private SmppConnectionState mNewState;
-        private SmppConnectionState mOldState;
-        private int mReconnectInteval;
+        private readonly SmppConnectionState _mNewState;
+        private readonly SmppConnectionState _mOldState;
+        private int _mReconnectInteval;
         #endregion
 
         #region Constructors
@@ -39,8 +39,8 @@ namespace Jamaa.Smpp.Net.Client
             SmppConnectionState newState,
             SmppConnectionState oldState)
         {
-            mNewState = newState;
-            mOldState = oldState;
+            _mNewState = newState;
+            _mOldState = oldState;
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Jamaa.Smpp.Net.Client
             int reconnectInteval)
             : this(newState, oldState)
         {
-            mReconnectInteval = reconnectInteval;
+            _mReconnectInteval = reconnectInteval;
         }
         #endregion
 
@@ -63,26 +63,20 @@ namespace Jamaa.Smpp.Net.Client
         /// <summary>
         /// Gets the previous <see cref="SmppClient"/> connection state
         /// </summary>
-        public SmppConnectionState PreviousState
-        {
-            get { return mOldState; }
-        }
+        public SmppConnectionState PreviousState => _mOldState;
 
         /// <summary>
         /// Gets the current <see cref="SmppClient"/> connection state
         /// </summary>
-        public SmppConnectionState CurrentState
-        {
-            get { return mNewState; }
-        }
+        public SmppConnectionState CurrentState => _mNewState;
 
         /// <summary>
         /// Gets or sets a value indicating the amount of time in miliseconds after which <see cref="SmppClient"/> should attemp to reestablish a lost connection
         /// </summary>
         public int ReconnectInteval
         {
-            get { return mReconnectInteval; }
-            set { mReconnectInteval = value; }
+            get { return _mReconnectInteval; }
+            set { _mReconnectInteval = value; }
         }
         #endregion
     }

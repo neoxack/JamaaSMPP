@@ -21,21 +21,19 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
     public class TcpIpSessionExceptionEventArgs : EventArgs
     {
         #region Variables
-        private Exception vException;
+        private readonly Exception _vException;
         #endregion
 
         #region Constructors
         public TcpIpSessionExceptionEventArgs(Exception ex)
         {
-            vException = ex;
+            _vException = ex;
         }
         #endregion
 
         #region Properties
-        public Exception Exception
-        {
-            get { return vException; }
-        }
+        public Exception Exception => _vException;
+
         #endregion
     }
 }

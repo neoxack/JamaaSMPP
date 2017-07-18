@@ -15,39 +15,30 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Protocol.Tlv;
 using JamaaTech.Smpp.Net.Lib.Util;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class PDU
+    public abstract class Pdu
     {
         #region Varibles
-        protected PDUHeader vHeader;
-        protected TlvCollection vTlv;
+        protected PduHeader VHeader;
+        protected TlvCollection VTlv;
         #endregion
 
         #region Constructors
-        internal PDU(PDUHeader header)
+        internal Pdu(PduHeader header)
         {
-            vHeader = header;
-            vTlv = new TlvCollection();
+            VHeader = header;
+            VTlv = new TlvCollection();
         }
         #endregion
 
         #region Properties
-        public PDUHeader Header
-        {
-            get { return vHeader; }
-        }
+        public PduHeader Header => VHeader;
 
-        public TlvCollection Tlv
-        {
-            get { return vTlv; }
-        }
+        public TlvCollection Tlv => VTlv;
 
         public abstract SmppEntityType AllowedSource { get;}
 
@@ -57,32 +48,32 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
 
         #region Methods
         #region Interface Methods
-        public static GenericNack GenericNack(PDUHeader header, SmppErrorCode errorCode)
+        public static GenericNack GenericNack(PduHeader header, SmppErrorCode errorCode)
         {
             if (header == null) { throw new ArgumentNullException("header"); }
-            GenericNack gNack = (GenericNack)CreatePDU(header);
+            GenericNack gNack = (GenericNack)CreatePdu(header);
             gNack.Header.ErrorCode = errorCode;
             return gNack;
         }
 
         public virtual GenericNack GenericNack(SmppErrorCode errorCode)
         {
-            PDUHeader header = new PDUHeader(CommandType.GenericNack,vHeader.SequenceNumber);
+            PduHeader header = new PduHeader(CommandType.GenericNack,VHeader.SequenceNumber);
             header.ErrorCode = errorCode;
-            GenericNack gNack = (GenericNack)CreatePDU(header);
+            GenericNack gNack = (GenericNack)CreatePdu(header);
             return gNack;
         }
 
         public virtual byte[] GetBytes()
         {
             byte[] bodyData = GetBodyData();
-            byte[] tlvData = vTlv.GetBytes();
+            byte[] tlvData = VTlv.GetBytes();
             int length = 16;
             length += bodyData == null ? 0 : bodyData.Length;
             length += tlvData == null ? 0 : tlvData.Length;
-            vHeader.CommandLength = (uint)length;
+            VHeader.CommandLength = (uint)length;
             ByteBuffer buffer = new ByteBuffer(length); //Allocate buffer with enough capacity
-            buffer.Append(vHeader.GetBytes());
+            buffer.Append(VHeader.GetBytes());
             if (bodyData != null) { buffer.Append(bodyData); }
             if (tlvData != null) { buffer.Append(tlvData); }
             return buffer.ToBytes();
@@ -96,11 +87,11 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
             try { Parse(buffer); }
-            catch (PDUException) { throw; }
-            catch (Exception ex) { PDUParseException.WrapAndThrow(ex); }
+            catch (PduException) { throw; }
+            catch (Exception ex) { PduParseException.WrapAndThrow(ex); }
         }
 
-        public static PDU CreatePDU(PDUHeader header)
+        public static Pdu CreatePdu(PduHeader header)
         {
             if (header == null) { throw new ArgumentNullException("header"); }
             switch (header.CommandType)
@@ -178,7 +169,7 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
                     return new QuerySmResp(header);
                     //--
                 default:
-                    throw new InvalidPDUCommandException();
+                    throw new InvalidPduCommandException();
             }
         }
         #endregion
@@ -188,8 +179,8 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         {
             //Get next terminating null value
             int pos = buffer.Find(0x00);
-            if (pos < 0) { throw new PDUFormatException("CString type field could not be read. The terminating charactor is missing"); }
-            try { string value = SMPPEncodingUtil.GetCStringFromBytes(buffer.Remove(pos + 1)); return value; }
+            if (pos < 0) { throw new PduFormatException("CString type field could not be read. The terminating charactor is missing"); }
+            try { string value = SmppEncodingUtil.GetCStringFromBytes(buffer.Remove(pos + 1)); return value; }
             catch (ArgumentException ex)
             {
                 //ByteBuffer.Remove(int count) throw ArgumentException if the buffer length is less than count
@@ -202,12 +193,12 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         internal static byte[] EncodeCString(string str)
         {
             if (str == null) { str = ""; }
-            return SMPPEncodingUtil.GetBytesFromCString(str);
+            return SmppEncodingUtil.GetBytesFromCString(str);
         }
 
         internal static string DecodeString(ByteBuffer buffer, int length)
         {
-            try { string value = SMPPEncodingUtil.GetStringFromBytes(buffer.Remove(length)); return value; }
+            try { string value = SmppEncodingUtil.GetStringFromBytes(buffer.Remove(length)); return value; }
             catch(ArgumentException ex)
             {
                 //ByteBuffer.Remove(int count) throw ArgumentException if the buffer length is less than count
@@ -233,14 +224,14 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         internal static byte[] EncodeString(string str)
         {
             if (str == null) { str = ""; }
-            return SMPPEncodingUtil.GetBytesFromString(str);
+            return SmppEncodingUtil.GetBytesFromString(str);
         }
         #endregion
 
         #region Overriden System.Object Members
         public override string ToString()
         {
-            return vHeader.ToString();
+            return VHeader.ToString();
         }
         #endregion
         #endregion

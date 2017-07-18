@@ -15,29 +15,25 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
     public class ParserExceptionEventArgs : EventArgs
     {
         #region Variables
-        private Exception vException;
+        private readonly Exception _vException;
         #endregion
 
         #region Constructors
         public ParserExceptionEventArgs(Exception exception)
         {
-            vException = exception;
+            _vException = exception;
         }
         #endregion
 
         #region Properties
-        public Exception Exception
-        {
-            get { return vException; }
-        }
+        public Exception Exception => _vException;
+
         #endregion
     }
 }

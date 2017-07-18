@@ -14,31 +14,27 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class SmOperationPDU : SmPDU
+    public abstract class SmOperationPdu : SmPdu
     {
         #region Variables
-        protected string vMessageID;
+        protected string VMessageId;
         #endregion
 
         #region Constructors
-        internal SmOperationPDU(PDUHeader header)
+        internal SmOperationPdu(PduHeader header)
             : base(header) 
         {
-            vMessageID = "";
+            VMessageId = "";
         }
         #endregion
 
         #region Properties
-        public string MessageID
+        public string MessageId
         {
-            get { return vMessageID; }
-            set { vMessageID = value; }
+            get { return VMessageId; }
+            set { VMessageId = value; }
         }
         #endregion
     }

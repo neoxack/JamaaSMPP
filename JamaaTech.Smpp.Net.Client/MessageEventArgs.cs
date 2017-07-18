@@ -24,7 +24,7 @@ namespace Jamaa.Smpp.Net.Client
     public class MessageEventArgs : EventArgs
     {
         #region Variables
-        private readonly ShortMessage vShortMessage;
+        private readonly ShortMessage _vShortMessage;
         #endregion
 
         #region Constructors
@@ -34,7 +34,7 @@ namespace Jamaa.Smpp.Net.Client
         /// <param name="message">The message associated with the message event</param>
         public MessageEventArgs(ShortMessage message)
         {
-            vShortMessage = message;
+            _vShortMessage = message;
         }
         #endregion
 
@@ -42,10 +42,8 @@ namespace Jamaa.Smpp.Net.Client
         /// <summary>
         /// Gets the message associated with this event
         /// </summary>
-        public ShortMessage ShortMessage
-        {
-            get { return vShortMessage; }
-        }
+        public ShortMessage ShortMessage => _vShortMessage;
+
         #endregion
     }
 }

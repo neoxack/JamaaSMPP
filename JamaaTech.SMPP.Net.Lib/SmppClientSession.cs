@@ -15,12 +15,9 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Networking;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 using System.Timers;
-using System.Net.Sockets;
 using System.Net;
 using System.Diagnostics;
 using JamaaTech.Smpp.Net.Lib.Util;
@@ -30,25 +27,25 @@ namespace JamaaTech.Smpp.Net.Lib
     public class SmppClientSession
     {
         #region Variables
-        private Timer vTimer;
-        private PDUTransmitter vTrans;
-        private ResponseHandler vRespHandler;
-        private StreamParser vStreamParser;
-        private TcpIpSession vTcpIpSession;
-        private object vSyncRoot;
-        private bool vIsAlive;
-        private SmppSessionState vState;
-        private int vDefaultResponseTimeout;
+        private Timer _vTimer;
+        private PduTransmitter _vTrans;
+        private ResponseHandler _vRespHandler;
+        private StreamParser _vStreamParser;
+        private TcpIpSession _vTcpIpSession;
+        private object _vSyncRoot;
+        private bool _vIsAlive;
+        private SmppSessionState _vState;
+        private int _vDefaultResponseTimeout;
 
-        private string vSmscId;
-        private string vSystemId;
-        private string vPassword;
-        private TypeOfNumber vAddressTon;
-        private NumberingPlanIndicator vAddressNpi;
+        private string _vSmscId;
+        private string _vSystemId;
+        private string _vPassword;
+        private TypeOfNumber _vAddressTon;
+        private NumberingPlanIndicator _vAddressNpi;
 
-        private SendPduCallback vCallback;
+        private readonly SendPduCallback _vCallback;
         //--
-        private static TraceSwitch vTraceSwitch = 
+        private static readonly TraceSwitch _vTraceSwitch = 
             new TraceSwitch("SmppClientSessionSwitch", "SmppClientSession class switch");
         #endregion
 
@@ -56,7 +53,7 @@ namespace JamaaTech.Smpp.Net.Lib
         /// <summary>
         /// Default delay between consecutive EnquireLink commands
         /// </summary>
-        private const int DEFAULT_DELAY = 60000;
+        private const int DefaultDelay = 60000;
         #endregion
 
         #region Events
@@ -68,12 +65,12 @@ namespace JamaaTech.Smpp.Net.Lib
         private SmppClientSession()
         {
             InitializeTimer();
-            vSyncRoot = new object();
-            vDefaultResponseTimeout = 5000;
-            vSmscId = "";
-            vSystemId = "";
-            vPassword = "";
-            vCallback = new SendPduCallback(SendPdu);
+            _vSyncRoot = new object();
+            _vDefaultResponseTimeout = 5000;
+            _vSmscId = "";
+            _vSystemId = "";
+            _vPassword = "";
+            _vCallback = new SendPduCallback(SendPdu);
             //-- Create and initialize trace switch
         }
         #endregion
@@ -81,88 +78,70 @@ namespace JamaaTech.Smpp.Net.Lib
         #region Properties
         public bool IsAlive
         {
-            get { lock (vSyncRoot) { return vIsAlive; } }
+            get { lock (_vSyncRoot) { return _vIsAlive; } }
         }
 
         public SmppSessionState State
         {
-            get { lock (vSyncRoot) { return vState; } }
+            get { lock (_vSyncRoot) { return _vState; } }
         }
 
-        public string SmscID
-        {
-            get { return vSmscId; }
-        }
+        public string SmscId => _vSmscId;
 
-        public string SystemID
-        {
-            get { return vSystemId; }
-        }
+        public string SystemId => _vSystemId;
 
-        public string Password
-        {
-            get { return vPassword; }
-        }
+        public string Password => _vPassword;
 
-        public NumberingPlanIndicator AddressNpi
-        {
-            get { return vAddressNpi; }
-        }
+        public NumberingPlanIndicator AddressNpi => _vAddressNpi;
 
-        public TypeOfNumber AddressTon
-        {
-            get { return vAddressTon; }
-        }
+        public TypeOfNumber AddressTon => _vAddressTon;
 
         public int EnquireLinkInterval
         {
-            get { return (int)vTimer.Interval; }
+            get { return (int)_vTimer.Interval; }
             set
             {
                 if (value < 1000)//If the value is less than one second
                 {
                     throw new ArgumentException("EnqureLink interval cannot be less than 1000 millseconds (1 second)");
                 }
-                vTimer.Interval = (double)value;
+                _vTimer.Interval = (double)value;
             }
         }
 
-        public TcpIpSessionProperties TcpIpProperties
-        {
-            get { return vTcpIpSession.Properties; }
-        }
+        public TcpIpSessionProperties TcpIpProperties => _vTcpIpSession.Properties;
 
         public int DefaultResponseTimeout
         {
-            get { return vDefaultResponseTimeout; }
-            set { vDefaultResponseTimeout = value; }
+            get { return _vDefaultResponseTimeout; }
+            set { _vDefaultResponseTimeout = value; }
         }
 
         public object SyncRoot
         {
-            get { return vSyncRoot; }
-            set { vSyncRoot = value; }
+            get { return _vSyncRoot; }
+            set { _vSyncRoot = value; }
         }
         #endregion
 
         #region Methods
         #region Interface Methods
-        public ResponsePDU SendPdu(RequestPDU pdu)
+        public ResponsePdu SendPdu(RequestPdu pdu)
         {
             int timeout = 0;
-            lock (vSyncRoot) { timeout = vDefaultResponseTimeout; }
+            lock (_vSyncRoot) { timeout = _vDefaultResponseTimeout; }
             return SendPdu(pdu, timeout);
         }
 
-        public ResponsePDU SendPdu(RequestPDU pdu, int timeout)
+        public ResponsePdu SendPdu(RequestPdu pdu, int timeout)
         {
             SendPduBase(pdu);
             if (pdu.HasResponse) 
             {
-                try { return vRespHandler.WaitResponse(pdu, timeout); }
+                try { return _vRespHandler.WaitResponse(pdu, timeout); }
                 catch (SmppResponseTimedOutException)
                 {
-                    if (vTraceSwitch.TraceWarning)
+                    if (_vTraceSwitch.TraceWarning)
                     { Trace.WriteLine("200016:PDU send operation timed out;"); }
                     throw;
                 }
@@ -170,15 +149,15 @@ namespace JamaaTech.Smpp.Net.Lib
             else { return null; }
         }
 
-        private void SendPduBase(PDU pdu)
+        private void SendPduBase(Pdu pdu)
         {
             if (pdu == null) { throw new ArgumentNullException("pdu"); }
-            if (!(CheckState(pdu) && (pdu.AllowedSource & SmppEntityType.ESME) == SmppEntityType.ESME))
-            { throw new SmppException(SmppErrorCode.ESME_RINVBNDSTS, "Incorrect bind status for given command"); }
-            try { vTrans.Send(pdu); }
+            if (!(CheckState(pdu) && (pdu.AllowedSource & SmppEntityType.Esme) == SmppEntityType.Esme))
+            { throw new SmppException(SmppErrorCode.EsmeRinvbndsts, "Incorrect bind status for given command"); }
+            try { _vTrans.Send(pdu); }
             catch (Exception ex)
             {
-                if (vTraceSwitch.TraceInfo)
+                if (_vTraceSwitch.TraceInfo)
                 {
                     ByteBuffer buffer = new ByteBuffer(pdu.GetBytes());
                     Trace.WriteLine(string.Format(
@@ -188,21 +167,21 @@ namespace JamaaTech.Smpp.Net.Lib
             }
         }
 
-        public IAsyncResult BeginSendPdu(RequestPDU pdu, int timeout,AsyncCallback callback, object @object)
+        public IAsyncResult BeginSendPdu(RequestPdu pdu, int timeout,AsyncCallback callback, object @object)
         {
-            return vCallback.BeginInvoke(pdu, timeout, callback, @object);
+            return _vCallback.BeginInvoke(pdu, timeout, callback, @object);
         }
 
-        public IAsyncResult BeginSendPdu(RequestPDU pdu, AsyncCallback callback, object @object)
+        public IAsyncResult BeginSendPdu(RequestPdu pdu, AsyncCallback callback, object @object)
         {
             int timeout = 0;
-            lock (vSyncRoot) { timeout = vDefaultResponseTimeout; }
+            lock (_vSyncRoot) { timeout = _vDefaultResponseTimeout; }
             return BeginSendPdu(pdu, timeout, callback, @object);
         }
 
-        public ResponsePDU EndSendPdu(IAsyncResult result)
+        public ResponsePdu EndSendPdu(IAsyncResult result)
         {
-            return vCallback.EndInvoke(result);
+            return _vCallback.EndInvoke(result);
         }
 
         public void EndSession()
@@ -220,7 +199,7 @@ namespace JamaaTech.Smpp.Net.Lib
                 tcpIpSession = CreateTcpIpSession(bindInfo);
                 //--
                 SmppClientSession smppSession = new SmppClientSession();
-                smppSession.vTcpIpSession = tcpIpSession;
+                smppSession._vTcpIpSession = tcpIpSession;
                 smppSession.ChangeState(SmppSessionState.Open);
                 smppSession.AssembleComponents();
                 try { smppSession.BindSession(bindInfo, timeOut); }
@@ -234,7 +213,7 @@ namespace JamaaTech.Smpp.Net.Lib
             }
             catch (Exception ex)
             {
-                if(vTraceSwitch.TraceInfo)
+                if(_vTraceSwitch.TraceInfo)
                 {
                     string traceMessage = "200017:SMPP bind operation failed:";
                     if(ex is SmppException) { traceMessage += (ex as SmppException).ErrorCode.ToString() + " - "; }
@@ -249,10 +228,10 @@ namespace JamaaTech.Smpp.Net.Lib
         #region Helper Methods
         private void EndSession(SmppSessionCloseReason reason, Exception exception)
         {
-            lock (vSyncRoot)
+            lock (_vSyncRoot)
             {
-                if (!vIsAlive) { return; }
-                vIsAlive = false;
+                if (!_vIsAlive) { return; }
+                _vIsAlive = false;
                 ChangeState(SmppSessionState.Closed);
             }
             if (reason != SmppSessionCloseReason.UnbindRequested)
@@ -261,8 +240,8 @@ namespace JamaaTech.Smpp.Net.Lib
                 Unbind unbind = new Unbind();
                 try 
                 {
-                    vTrans.Send(unbind);
-                    vRespHandler.WaitResponse(unbind, 1000);
+                    _vTrans.Send(unbind);
+                    _vRespHandler.WaitResponse(unbind, 1000);
                 }
                 catch {/*Silent catch*/}
             }
@@ -294,57 +273,57 @@ namespace JamaaTech.Smpp.Net.Lib
 
         private void DestroyTcpIpSession()
         {
-            if (vTcpIpSession == null) { return; }
-            vTcpIpSession.SessionClosed -= TcpIpSessionClosedEventHandler;
-            vTcpIpSession.EndSession();
-            vTcpIpSession = null;
+            if (_vTcpIpSession == null) { return; }
+            _vTcpIpSession.SessionClosed -= TcpIpSessionClosedEventHandler;
+            _vTcpIpSession.EndSession();
+            _vTcpIpSession = null;
         }
 
         private void AssembleComponents()
         {
-            vTrans = new PDUTransmitter(vTcpIpSession);
-            vRespHandler = new ResponseHandler();
-            vStreamParser = new StreamParser(
-                vTcpIpSession, vRespHandler, new PduProcessorCallback(PduRequestProcessorCallback));
-            vStreamParser.ParserException += ParserExceptionEventHandler;
-            vStreamParser.PDUError += PduErrorEventHandler;
+            _vTrans = new PduTransmitter(_vTcpIpSession);
+            _vRespHandler = new ResponseHandler();
+            _vStreamParser = new StreamParser(
+                _vTcpIpSession, _vRespHandler, new PduProcessorCallback(PduRequestProcessorCallback));
+            _vStreamParser.ParserException += ParserExceptionEventHandler;
+            _vStreamParser.PduError += PduErrorEventHandler;
             //Start stream parser
-            vStreamParser.Start();
+            _vStreamParser.Start();
         }
 
         private void DisassembleComponents()
         {
-            if (vStreamParser == null) { return; }
-            vStreamParser.ParserException -= ParserExceptionEventHandler;
-            vStreamParser.PDUError -= PduErrorEventHandler;
+            if (_vStreamParser == null) { return; }
+            _vStreamParser.ParserException -= ParserExceptionEventHandler;
+            _vStreamParser.PduError -= PduErrorEventHandler;
             //Stop parser first
-            vStreamParser.Stop(true);
-            vStreamParser = null;
-            vTrans = null;
-            vRespHandler = null;
+            _vStreamParser.Stop(true);
+            _vStreamParser = null;
+            _vTrans = null;
+            _vRespHandler = null;
         }
 
         private void BindSession(SessionBindInfo bindInfo, int timeOut)
         {
-            vTcpIpSession.SessionClosed += TcpIpSessionClosedEventHandler;
+            _vTcpIpSession.SessionClosed += TcpIpSessionClosedEventHandler;
 
             BindRequest bindReq = bindInfo.CreatePdu();
-            vTrans.Send(bindReq);
+            _vTrans.Send(bindReq);
             BindResponse bindResp = null;
-            try { bindResp = (BindResponse)vRespHandler.WaitResponse(bindReq, timeOut); }
+            try { bindResp = (BindResponse)_vRespHandler.WaitResponse(bindReq, timeOut); }
             catch (SmppResponseTimedOutException ex)
             { throw new SmppBindException(ex); }
             if (bindResp.Header.ErrorCode != 0)
             { throw new SmppBindException(bindResp.Header.ErrorCode); }
             //Copy settings
-            vSmscId = bindResp.SystemID;
-            vSystemId = bindInfo.SystemID;
-            vPassword = bindInfo.Password;
-            vAddressTon = bindInfo.AddressTon;
-            vAddressNpi = bindInfo.AddressNpi;
+            _vSmscId = bindResp.SystemId;
+            _vSystemId = bindInfo.SystemId;
+            _vPassword = bindInfo.Password;
+            _vAddressTon = bindInfo.AddressTon;
+            _vAddressNpi = bindInfo.AddressNpi;
             //Start timer
-            vTimer.Start();
-            vIsAlive = true;
+            _vTimer.Start();
+            _vIsAlive = true;
             switch (bindReq.Header.CommandType)
             {
                 case CommandType.BindTransceiver:
@@ -361,27 +340,27 @@ namespace JamaaTech.Smpp.Net.Lib
 
         private void InitializeTimer()
         {
-            vTimer = new Timer(DEFAULT_DELAY);
-            vTimer.Elapsed += new ElapsedEventHandler(TimerCallback);
+            _vTimer = new Timer(DefaultDelay);
+            _vTimer.Elapsed += new ElapsedEventHandler(TimerCallback);
         }
 
         private void DestroyTimer()
         {
-            try { vTimer.Stop(); vTimer.Close(); }
+            try { _vTimer.Stop(); _vTimer.Close(); }
             catch {/*Silent catch*/}
         }
 
         private void ChangeState(SmppSessionState newState)
         {
-            lock (vSyncRoot)
+            lock (_vSyncRoot)
             {
-                vState = newState;
+                _vState = newState;
             }
         }
 
-        private bool CheckState(PDU pdu)
+        private bool CheckState(Pdu pdu)
         {
-            return (int)(pdu.AllowedSession & vState) != 0;
+            return (int)(pdu.AllowedSession & _vState) != 0;
         }
 
         private void TimerCallback(object sender, ElapsedEventArgs e)
@@ -402,9 +381,9 @@ namespace JamaaTech.Smpp.Net.Lib
             catch (TcpIpException) {/*Silent catch*/ }
         }
 
-        private void PduRequestProcessorCallback(RequestPDU pdu)
+        private void PduRequestProcessorCallback(RequestPdu pdu)
         {
-            ResponsePDU resp = null;
+            ResponsePdu resp = null;
             if (pdu is Unbind)
             {
                 resp = pdu.CreateDefaultResponce();
@@ -443,12 +422,12 @@ namespace JamaaTech.Smpp.Net.Lib
             EndSession(SmppSessionCloseReason.TcpIpSessionError, e.Exception);
         }
 
-        private void PduErrorEventHandler(object sender, PDUErrorEventArgs e)
+        private void PduErrorEventHandler(object sender, PduErrorEventArgs e)
         {
-            ResponsePDU resp = null;
-            if (e.Pdu is RequestPDU)
+            ResponsePdu resp = null;
+            if (e.Pdu is RequestPdu)
             {
-                RequestPDU req = (RequestPDU)e.Pdu;
+                RequestPdu req = (RequestPdu)e.Pdu;
                 resp = req.CreateDefaultResponce();
                 resp.Header.ErrorCode = e.Exception.ErrorCode;
             }
@@ -461,7 +440,7 @@ namespace JamaaTech.Smpp.Net.Lib
             catch {/*silent catch*/}
         }
 
-        private ResponsePDU RaisePduReceivedEvent(RequestPDU pdu)
+        private ResponsePdu RaisePduReceivedEvent(RequestPdu pdu)
         {
             /*
              * PduReceived event is not raised asynchronously as this method is 

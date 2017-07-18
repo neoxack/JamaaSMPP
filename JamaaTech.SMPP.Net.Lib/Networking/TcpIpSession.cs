@@ -29,23 +29,23 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
         /// <summary>
         /// The underlying socket used for sending and receiving data
         /// </summary>
-        protected Socket vSocket;
+        protected Socket VSocket;
         /// <summary>
         /// The type of session this instance represents
         /// </summary>
-        private SessionType vSessionType;
+        private readonly SessionType _vSessionType;
         /// <summary>
         /// True if the connection is open or false otherwise
         /// </summary>
-        private bool vIsAlive;
+        private bool _vIsAlive;
         /// <summary>
         /// Lock this variable when access the vIsAlive variable
         /// </summary>
-        private object vSyncRoot;
+        private readonly object _vSyncRoot;
         /// <summary>
         /// Properties for this instance
         /// </summary>
-        private TcpIpSessionProperties vProperties;
+        private TcpIpSessionProperties _vProperties;
         #endregion
 
         #region Constructors
@@ -57,9 +57,9 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
         internal TcpIpSession(Socket socket, SessionType sessionType)
         {
             if (socket == null) { throw new ArgumentNullException("socket"); }
-            vSocket = socket;
-            vSessionType = sessionType;
-            vSyncRoot = new object();
+            VSocket = socket;
+            _vSessionType = sessionType;
+            _vSyncRoot = new object();
         }
         #endregion
 
@@ -70,19 +70,13 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
         #endregion
 
         #region Properties
-        public TcpIpSessionProperties Properties
-        {
-            get { return vProperties; }
-        }
+        public TcpIpSessionProperties Properties => _vProperties;
 
-        public SessionType SessionType
-        {
-            get { return vSessionType; }
-        }
+        public SessionType SessionType => _vSessionType;
 
         public bool IsAlive
         {
-            get { lock (vSyncRoot) { return vIsAlive; } }
+            get { lock (_vSyncRoot) { return _vIsAlive; } }
         }
 
         #endregion
@@ -135,10 +129,10 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
              * This rule is kept deliberately to prevent duplicate events
              * from multiple threads encountering exceptions almost at the same time.
              */
-            lock (vSyncRoot)
+            lock (_vSyncRoot)
             {
-                if (!vIsAlive) { WrapAndThrow(exception); }
-                vIsAlive = false;
+                if (!_vIsAlive) { WrapAndThrow(exception); }
+                _vIsAlive = false;
             }
             /*
              * If an exception is thrown during sending or receiving data operation
@@ -199,9 +193,9 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
         /// </summary>
         private void CheckSession()
         {
-            lock (vSyncRoot)
+            lock (_vSyncRoot)
             {
-                if (!vIsAlive) { throw new TcpIpSessionClosedException("TCP/IP session cannot send or receive data because it has been shutdown"); }
+                if (!_vIsAlive) { throw new TcpIpSessionClosedException("TCP/IP session cannot send or receive data because it has been shutdown"); }
             }
         }
 
@@ -244,7 +238,7 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
         public void Send(byte[] buffer)
         {
             CheckSession();
-            try { vSocket.Send(buffer); }
+            try { VSocket.Send(buffer); }
             catch (SocketException ex)
             { HandleException(ex); }
         }
@@ -252,7 +246,7 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
         public void Send(byte[] buffer, int start, int length)
         {
             CheckSession();
-            try { vSocket.Send(buffer, start, length, SocketFlags.None); }
+            try { VSocket.Send(buffer, start, length, SocketFlags.None); }
             catch (SocketException ex)
             { HandleException(ex); }
         }
@@ -260,7 +254,7 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
         public int Receive(byte[] buffer)
         {
             CheckSession();
-            try { return vSocket.Receive(buffer); }
+            try { return VSocket.Receive(buffer); }
             catch (SocketException ex)
             { HandleException(ex); throw; }
         }
@@ -270,15 +264,15 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
             CheckSession();
             try 
             {
-                int received = vSocket.Receive(buffer, start, length, SocketFlags.None);
+                int received = VSocket.Receive(buffer, start, length, SocketFlags.None);
                 //If underlying socket returns zero bytes, close this session
                 //as this indicates a closed socket connection by the remote host.
                 if (received == 0)
                 {
-                    lock (vSyncRoot)
+                    lock (_vSyncRoot)
                     {
-                        if (!vIsAlive) { return received; }
-                        vIsAlive = false;
+                        if (!_vIsAlive) { return received; }
+                        _vIsAlive = false;
                     }
                     TerminateSession(SessionCloseReason.SocketShutdown, null);
                 }
@@ -290,22 +284,22 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
 
         public void EndSession()
         {
-            lock (vSyncRoot)
+            lock (_vSyncRoot)
             {
-                if (!vIsAlive) { return; }
+                if (!_vIsAlive) { return; }
                 TerminateSession(SessionCloseReason.EndSessionCalled, null);
-                vIsAlive = false;
+                _vIsAlive = false;
             }
         }
 
         private void TerminateSession(SessionCloseReason reason, Exception exception)
         {
             //shutdown socket
-            vSocket.Shutdown(SocketShutdown.Both);
+            VSocket.Shutdown(SocketShutdown.Both);
             //disconnect socket
-            vSocket.Disconnect(false);
+            VSocket.Disconnect(false);
             //Close to release any resources claimed by the socket instance
-            vSocket.Close();
+            VSocket.Close();
             RaiseSessionClosedEvent(reason, exception);
         }
 
@@ -321,8 +315,8 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
             try { socket.Connect(ipAddress, port); } //Connect to the server of the specified ipAddress on the specified port
             catch (SocketException ex) { HandleConnectionException(ex); }
             TcpIpSession session = new TcpIpSession(socket, SessionType.Client);
-            session.vProperties = new TcpIpSessionProperties(socket);
-            session.vIsAlive = true;
+            session._vProperties = new TcpIpSessionProperties(socket);
+            session._vIsAlive = true;
             return session;
         }
 
@@ -332,8 +326,8 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
             try { socket.Connect(endPoint); }
             catch (SocketException ex) { HandleConnectionException(ex); }
             TcpIpSession session = new TcpIpSession(socket, SessionType.Client);
-            session.vProperties = new TcpIpSessionProperties(socket);
-            session.vIsAlive = true;
+            session._vProperties = new TcpIpSessionProperties(socket);
+            session._vIsAlive = true;
             return session;
         }
 
@@ -343,8 +337,8 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
             try { socket.Connect(addresses,port); }
             catch (SocketException ex) { HandleConnectionException(ex); }
             TcpIpSession session = new TcpIpSession(socket, SessionType.Client);
-            session.vProperties = new TcpIpSessionProperties(socket);
-            session.vIsAlive = true;
+            session._vProperties = new TcpIpSessionProperties(socket);
+            session._vIsAlive = true;
             return session;
         }
 
@@ -354,8 +348,8 @@ namespace JamaaTech.Smpp.Net.Lib.Networking
             try { socket.Connect(hostName, port); } //Connect to the specified host on the specified port
             catch (SocketException ex) { HandleConnectionException(ex); }
             TcpIpSession session = new TcpIpSession(socket, SessionType.Client);
-            session.vProperties = new TcpIpSessionProperties(socket);
-            session.vIsAlive = true;
+            session._vProperties = new TcpIpSessionProperties(socket);
+            session._vIsAlive = true;
             return session;
         }
         #endregion

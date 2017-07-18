@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using Jamaa.Smpp.Net.Client;
 
@@ -8,13 +6,13 @@ namespace DemoClient
 {
     class Program
     {
-        static ISmppConfiguration smppConfig;
+        static ISmppConfiguration _smppConfig;
 
         static void Main(string[] args)
         {
-            smppConfig = GetSmppConfiguration();
+            _smppConfig = GetSmppConfiguration();
 
-            var client = CreateSmppClient(smppConfig);
+            var client = CreateSmppClient(_smppConfig);
             client.Start();
             // must wait until connected before start sending
             while (client.ConnectionState != SmppConnectionState.Connected)
@@ -39,7 +37,7 @@ namespace DemoClient
                 TimeOut = 60000,
                 StartAutomatically = true,
                 Name = "MyLocalClient",
-                SystemID = "smppclient1",
+                SystemId = "smppclient1",
                 Password = "password",
                 Host = "localhost",
                 Port = 2775,
@@ -49,7 +47,7 @@ namespace DemoClient
                 AutoReconnectDelay = 5000,
                 KeepAliveInterval = 5000,
                 ReconnectInteval = 10000,
-                Encoding = JamaaTech.Smpp.Net.Lib.DataCoding.ASCII
+                Encoding = JamaaTech.Smpp.Net.Lib.DataCoding.Ascii
             };
         }
 
@@ -64,7 +62,7 @@ namespace DemoClient
             client.MessageReceived += new EventHandler<MessageEventArgs>(client_MessageReceived);
 
             SmppConnectionProperties properties = client.Properties;
-            properties.SystemID = config.SystemID;// "mysystemid";
+            properties.SystemId = config.SystemId;// "mysystemid";
             properties.Password = config.Password;// "mypassword";
             properties.Port = config.Port;// 2034; //IP port to use
             properties.Host = config.Host;// "196.23.3.12"; //SMSC host name or IP Address
@@ -93,7 +91,7 @@ namespace DemoClient
                     //Do something here
                     {
                         Console.WriteLine("SMPP client {0} - CLOSED", client.Name);
-                        e.ReconnectInteval = smppConfig.ReconnectInteval; //Try to reconnect after Interval in seconds
+                        e.ReconnectInteval = _smppConfig.ReconnectInteval; //Try to reconnect after Interval in seconds
                         break;
                     }
                 case SmppConnectionState.Connected:

@@ -15,7 +15,6 @@
  ************************************************************************/
 
 using System;
-using System.Net.Sockets;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 using JamaaTech.Smpp.Net.Lib.Networking;
 using JamaaTech.Smpp.Net.Lib.Util;
@@ -29,18 +28,18 @@ namespace JamaaTech.Smpp.Net.Lib
     public class StreamParser : RunningComponent
     {
         #region Variables
-        private TcpIpSession vTcpIpSession;
-        private PduProcessorCallback vProcessorCallback;
-        private ResponseHandler vResponseHandler;
+        private readonly TcpIpSession _vTcpIpSession;
+        private readonly PduProcessorCallback _vProcessorCallback;
+        private readonly ResponseHandler _vResponseHandler;
         //--
-        private TraceSwitch vTraceSwitch;
+        private readonly TraceSwitch _vTraceSwitch;
         #endregion
 
         #region Events
         /// <summary>
         /// Raised when a malformed pdu is encountered by the parser.
         /// </summary>
-        public event EventHandler<PDUErrorEventArgs> PDUError;
+        public event EventHandler<PduErrorEventArgs> PduError;
         /// <summary>
         /// Raised when an exception is thrown while a byte stream is being parsed or during pdu creation.
         /// </summary>
@@ -52,18 +51,18 @@ namespace JamaaTech.Smpp.Net.Lib
         /// Creates a new instance of the <see cref="StreamParser"/> class
         /// </summary>
         /// <param name="session">A <see cref="TcpIpSession"/></param>
-        /// <param name="responseQueue">A <see cref="ResponseQueue"/> instance to which <see cref="ResponsePDU"/> pdu's are forwarded</param>
-        /// <param name="requestProcessor">A callback delegate for processing <see cref="RequestPDU"/> pdu's</param>
+        /// <param name="responseQueue">A <see cref="ResponseQueue"/> instance to which <see cref="ResponsePdu"/> pdu's are forwarded</param>
+        /// <param name="requestProcessor">A callback delegate for processing <see cref="RequestPdu"/> pdu's</param>
         public StreamParser(TcpIpSession session,  ResponseHandler responseQueue,PduProcessorCallback requestProcessor)
         {
             if (session == null) { throw new ArgumentNullException("session"); }
             if (requestProcessor == null) { throw new ArgumentNullException("requestProcessor"); }
             if (responseQueue == null) { throw new ArgumentNullException("responseQueue"); }
-            vTcpIpSession = session;
-            vProcessorCallback = requestProcessor;
-            vResponseHandler = responseQueue;
+            _vTcpIpSession = session;
+            _vProcessorCallback = requestProcessor;
+            _vResponseHandler = responseQueue;
             //--Create and initialize a trace switch
-            vTraceSwitch = new TraceSwitch("StreamParserSwitch", "Stream perser switch");
+            _vTraceSwitch = new TraceSwitch("StreamParserSwitch", "Stream perser switch");
         }
         #endregion
 
@@ -84,16 +83,16 @@ namespace JamaaTech.Smpp.Net.Lib
             {
                 try
                 {
-                    PDU pdu = WaitPDU();
-                    if (pdu is RequestPDU) { vProcessorCallback.BeginInvoke(
-                        (RequestPDU)pdu,AsyncCallBackProcessPduRequest,null); }
-                    else if (pdu is ResponsePDU) { vResponseHandler.Handle(pdu as ResponsePDU); }
+                    Pdu pdu = WaitPdu();
+                    if (pdu is RequestPdu) { _vProcessorCallback.BeginInvoke(
+                        (RequestPdu)pdu,AsyncCallBackProcessPduRequest,null); }
+                    else if (pdu is ResponsePdu) { _vResponseHandler.Handle(pdu as ResponsePdu); }
                 }
-                catch (PDUException) { /*Silent catch*/ }
+                catch (PduException) { /*Silent catch*/ }
                 catch (TcpIpException) { /*Silent catch*/ }
                 catch (Exception ex)
                 {
-                    if (vTraceSwitch.TraceError)
+                    if (_vTraceSwitch.TraceError)
                     {
                         Trace.WriteLine(string.Format(
                             "200015:Unanticipated stream parser exception:{0};", ex));
@@ -106,68 +105,68 @@ namespace JamaaTech.Smpp.Net.Lib
         #endregion
 
         #region Helper Methods
-        private PDU WaitPDU()
+        private Pdu WaitPdu()
         {
-            PDUHeader header = null;
-            PDU pdu = null;
+            PduHeader header = null;
+            Pdu pdu = null;
             byte[] bodyBytes = null;
             byte[] headerBytes = null;
             //--
             try { headerBytes = ReadHeaderBytes(); }
-            catch (TcpIpException tcpIp_ex_1) 
+            catch (TcpIpException tcpIpEx1) 
             {
-                if (vTraceSwitch.TraceInfo)
+                if (_vTraceSwitch.TraceInfo)
                 {
                     Trace.WriteLine(string.Format(
                         "200010:TCP/IP Exception encountered while reading pdu header bytes:{0};",
-                        tcpIp_ex_1.Message));
+                        tcpIpEx1.Message));
                 }
-                HandleException(tcpIp_ex_1); throw; 
+                HandleException(tcpIpEx1); throw; 
             }
             //--
-            header = PDUHeader.Parse(new ByteBuffer(headerBytes));
-            try { pdu = PDU.CreatePDU(header); }
-            catch (InvalidPDUCommandException inv_ex)
+            header = PduHeader.Parse(new ByteBuffer(headerBytes));
+            try { pdu = Pdu.CreatePdu(header); }
+            catch (InvalidPduCommandException invEx)
             {
                 ByteBuffer iBuffer = new ByteBuffer((int)header.CommandLength);
                 iBuffer.Append(header.GetBytes());
                 if (header.CommandLength > 16)
                 {
                     try { iBuffer.Append(ReadBodyBytes((int)header.CommandLength - 16)); }
-                    catch (TcpIpException tcpIp_ex_3) { HandleException(tcpIp_ex_3); }
+                    catch (TcpIpException tcpIpEx3) { HandleException(tcpIpEx3); }
                 }
-                if (vTraceSwitch.TraceWarning)
+                if (_vTraceSwitch.TraceWarning)
                 {
                     Trace.WriteLine(string.Format(
                         "200011:Invalid PDU command type:{0};", iBuffer.DumpString()));
                 }
-                RaisePduErrorEvent(inv_ex, iBuffer.ToBytes(), header, null);
+                RaisePduErrorEvent(invEx, iBuffer.ToBytes(), header, null);
                 throw;
             }
             //--
             try { bodyBytes = ReadBodyBytes((int)header.CommandLength - 16); }
-            catch (TcpIpException tpcIp_ex_2) 
+            catch (TcpIpException tpcIpEx2) 
             {
-                if (vTraceSwitch.TraceInfo)
+                if (_vTraceSwitch.TraceInfo)
                 {
                     Trace.WriteLine(string.Format(
                         "200012:TCP/IP Exception encountered while reading pdu body bytes:{0};",
-                        tpcIp_ex_2.Message));
+                        tpcIpEx2.Message));
                 }
-                HandleException(tpcIp_ex_2); throw; 
+                HandleException(tpcIpEx2); throw; 
             }
             //--
             try { pdu.SetBodyData(new ByteBuffer(bodyBytes)); }
-            catch (PDUException pdu_ex)
+            catch (PduException pduEx)
             {
                 ByteBuffer pBuffer = new ByteBuffer((int)header.CommandLength);
                 pBuffer.Append(headerBytes);
                 pBuffer.Append(bodyBytes);
-                RaisePduErrorEvent( pdu_ex, pBuffer.ToBytes(), header, pdu);
-                if (vTraceSwitch.TraceWarning)
+                RaisePduErrorEvent( pduEx, pBuffer.ToBytes(), header, pdu);
+                if (_vTraceSwitch.TraceWarning)
                 {
                     Trace.WriteLine(string.Format(
-                        "200013:Malformed PDU body received:{0} {1};", pBuffer.DumpString(), pdu_ex.Message));
+                        "200013:Malformed PDU body received:{0} {1};", pBuffer.DumpString(), pduEx.Message));
                 }
                 throw;
             }
@@ -191,8 +190,8 @@ namespace JamaaTech.Smpp.Net.Lib
             int received = 0;
             while (remaining > 0)
             {
-                int receiveCount = vTcpIpSession.Receive(bytes, received, remaining);
-                if (receiveCount == 0 && vTraceSwitch.TraceWarning)
+                int receiveCount = _vTcpIpSession.Receive(bytes, received, remaining);
+                if (receiveCount == 0 && _vTraceSwitch.TraceWarning)
                 { Trace.WriteLine("200014:TCP/IP receive operation returned zero bytes;"); }
                 received += receiveCount;
                 remaining = length - received;
@@ -206,11 +205,11 @@ namespace JamaaTech.Smpp.Net.Lib
             StopOnNextCycle();
         }
 
-        private void RaisePduErrorEvent(PDUException exception, byte[] byteDump, PDUHeader header, PDU pdu)
+        private void RaisePduErrorEvent(PduException exception, byte[] byteDump, PduHeader header, Pdu pdu)
         {
-            if (PDUError == null) { return; }
-            PDUErrorEventArgs e = new PDUErrorEventArgs(exception, byteDump, header, pdu);
-            foreach (EventHandler<PDUErrorEventArgs> del in PDUError.GetInvocationList())
+            if (PduError == null) { return; }
+            PduErrorEventArgs e = new PduErrorEventArgs(exception, byteDump, header, pdu);
+            foreach (EventHandler<PduErrorEventArgs> del in PduError.GetInvocationList())
             { del.BeginInvoke(this, e, AsyncCallBackRaisePduErrorEvent, del); }
         }
 
@@ -224,8 +223,8 @@ namespace JamaaTech.Smpp.Net.Lib
 
         private void AsyncCallBackRaisePduErrorEvent(IAsyncResult result)
         {
-            EventHandler<PDUErrorEventArgs> del =
-                (EventHandler<PDUErrorEventArgs>)result.AsyncState;
+            EventHandler<PduErrorEventArgs> del =
+                (EventHandler<PduErrorEventArgs>)result.AsyncState;
             del.EndInvoke(result);
         }
 
@@ -238,7 +237,7 @@ namespace JamaaTech.Smpp.Net.Lib
 
         private void AsyncCallBackProcessPduRequest(IAsyncResult result)
         {
-            vProcessorCallback.EndInvoke(result);
+            _vProcessorCallback.EndInvoke(result);
         }
         #endregion
         #endregion

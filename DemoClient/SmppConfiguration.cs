@@ -1,7 +1,4 @@
 ﻿using JamaaTech.Smpp.Net.Lib;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DemoClient
 {
@@ -19,7 +16,7 @@ namespace DemoClient
         public int Port { get; set; }
         public int ReconnectInteval { get; set; }
         public string SourceAddress { get; set; }
-        public string SystemID { get; set; }
+        public string SystemId { get; set; }
         public string SystemType { get; set; }
         public int TimeOut { get; set; }
         public bool StartAutomatically { get; set; }

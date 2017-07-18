@@ -15,9 +15,6 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib.Protocol;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
@@ -37,11 +34,11 @@ namespace JamaaTech.Smpp.Net.Lib
         /// <summary>
         /// SMSC default alphabet
         /// </summary>
-        SMSCDefault = 0x00,
+        SmscDefault = 0x00,
         /// <summary>
         /// IA5 (CCITT T.50)/ASCII (ANSI X3.4)
         /// </summary>
-        ASCII = 0x01,
+        Ascii = 0x01,
         /// <summary>
         /// Octet unspecified (8-bit binary)
         /// </summary>
@@ -57,7 +54,7 @@ namespace JamaaTech.Smpp.Net.Lib
         /// <summary>
         /// JIS (X 0208-1990)
         /// </summary>
-        JIS = 0x05,
+        Jis = 0x05,
         /// <summary>
         /// Cyrllic (ISO-8859-5)
         /// </summary>
@@ -65,11 +62,11 @@ namespace JamaaTech.Smpp.Net.Lib
         /// <summary>
         /// Latin/Hebrew (ISO-8859-8)
         /// </summary>
-        Latin_Hebrew = 0x07,
+        LatinHebrew = 0x07,
         /// <summary>
         /// UCS2 (ISO/IEC-10646)
         /// </summary>
-        UCS2 = 0x08,
+        Ucs2 = 0x08,
         /// <summary>
         /// Pictogram Encoding
         /// </summary>
@@ -85,18 +82,18 @@ namespace JamaaTech.Smpp.Net.Lib
         /// <summary>
         /// KS C 5601
         /// </summary>
-        KS_C_5601 = 0x0e,
+        KsC5601 = 0x0e,
         /// <summary>
         /// GSM MWI control
         /// </summary>
-        GSM_MWI_1 = 0xc0,
+        GsmMwi1 = 0xc0,
         /// <summary>
         /// GMS MWI control
         /// </summary>
-        GSM_MWI_2 = 0xd0,
+        GsmMwi2 = 0xd0,
         /// <summary>
         /// GMS message class control
         /// </summary>
-        GMS_MessageClass = 0xf0
+        GmsMessageClass = 0xf0
     }
 }

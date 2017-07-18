@@ -14,22 +14,18 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
     public static class ServiceType
     {
         #region Constants
-        public const string DEFAULT = ""; //Empty string
-        public const string CELLULAR_MESSAGING = "CMT";
-        public const string CELLULAR_PAGING = "CPT";
-        public const string VOICE_MAIL_NOTIFICATION = "VMN";
-        public const string VOICE_MAIL_ALERTING = "VMA";
-        public const string WIRELESS_APPLICATION_PROTOCOL = "WAP";
-        public const string UNSTRUCTURED_SUPPLIMENTARY_SERVICE_DATA = "USSD";
+        public const string Default = ""; //Empty string
+        public const string CellularMessaging = "CMT";
+        public const string CellularPaging = "CPT";
+        public const string VoiceMailNotification = "VMN";
+        public const string VoiceMailAlerting = "VMA";
+        public const string WirelessApplicationProtocol = "WAP";
+        public const string UnstructuredSupplimentaryServiceData = "USSD";
         #endregion
     }
 }

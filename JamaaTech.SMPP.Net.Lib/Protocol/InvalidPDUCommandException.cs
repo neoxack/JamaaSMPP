@@ -14,18 +14,13 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class InvalidPDUCommandException : PDUException
+    public class InvalidPduCommandException : PduException
     {
         #region Constructors
-        public InvalidPDUCommandException()
-            : base(SmppErrorCode.ESME_RINVCMDID, "Invalid command ID") { }
+        public InvalidPduCommandException()
+            : base(SmppErrorCode.EsmeRinvcmdid, "Invalid command ID") { }
         #endregion
     }
 }

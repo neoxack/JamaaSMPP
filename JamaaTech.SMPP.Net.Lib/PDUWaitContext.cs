@@ -14,53 +14,45 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
-    internal class PDUWaitContext
+    internal class PduWaitContext
     {
         #region Variables
-        private uint vSequenceNumber;
-        private AutoResetEvent vNotifyEvent;
-        private int vTimeOut;
-        private bool vTimedOut;
+
+        private readonly AutoResetEvent _vNotifyEvent;
+        private readonly int _vTimeOut;
+        private bool _vTimedOut;
         #endregion
 
         #region Constructors
-        public PDUWaitContext(uint sequenceNumber,int timeOut)
+        public PduWaitContext(uint sequenceNumber,int timeOut)
         {
-            vSequenceNumber = sequenceNumber;
-            vNotifyEvent = new AutoResetEvent(false);
-            vTimeOut = timeOut;
+            SequenceNumber = sequenceNumber;
+            _vNotifyEvent = new AutoResetEvent(false);
+            _vTimeOut = timeOut;
         }
         #endregion
 
         #region Properties
-        public uint SequenceNumber
-        {
-            get { return vSequenceNumber; }
-        }
+        public uint SequenceNumber { get; }
 
-        public bool TimedOut
-        {
-            get { return vTimedOut; }
-        }
+        public bool TimedOut => _vTimedOut;
+
         #endregion
 
         #region Methods
         public bool WaitForAlert()
         {
-            vTimedOut = !vNotifyEvent.WaitOne(vTimeOut,false);
-            return !vTimedOut;
+            _vTimedOut = !_vNotifyEvent.WaitOne(_vTimeOut,false);
+            return !_vTimedOut;
         }
 
         public void AlertResponseReceived()
         {
-            vNotifyEvent.Set();
+            _vNotifyEvent.Set();
         }
         #endregion
     }

@@ -15,22 +15,19 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class PDUParseException : PDUException
+    public class PduParseException : PduException
     {
         #region Constructors
-        public PDUParseException(SmppErrorCode errorCode)
+        public PduParseException(SmppErrorCode errorCode)
             : base(errorCode) { }
 
-        public PDUParseException(SmppErrorCode errorCode, string message)
+        public PduParseException(SmppErrorCode errorCode, string message)
             : base(errorCode, message) { }
 
-        public PDUParseException(SmppErrorCode errorCode, string message, Exception innerException)
+        public PduParseException(SmppErrorCode errorCode, string message, Exception innerException)
             : base(errorCode, message, innerException) { }
         #endregion
 
@@ -38,7 +35,7 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         public static void WrapAndThrow(Exception innerException)
         {
             if (innerException == null) { throw new ArgumentNullException("innerException"); }
-            throw new PDUParseException(SmppErrorCode.ESME_RUNKNOWNERR,
+            throw new PduParseException(SmppErrorCode.EsmeRunknownerr,
                 innerException.Message, innerException);
         }
         #endregion

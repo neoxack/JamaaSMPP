@@ -14,15 +14,11 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
     public enum DestinationFlag : byte
     {
-        SMEAddress = 1,
+        SmeAddress = 1,
         DistributionListName = 2
     }
 }

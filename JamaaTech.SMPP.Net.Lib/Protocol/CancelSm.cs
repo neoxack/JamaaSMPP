@@ -15,72 +15,61 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class CancelSm : SmOperationPDU
+    public sealed class CancelSm : SmOperationPdu
     {
         #region Variables
-        private SmppAddress vDestinationAddress;
+        private SmppAddress _vDestinationAddress;
         #endregion
 
         #region Constuctors
         public CancelSm()
-            : base(new PDUHeader(CommandType.CancelSm))
+            : base(new PduHeader(CommandType.CancelSm))
         {
-            vDestinationAddress = new SmppAddress();
+            _vDestinationAddress = new SmppAddress();
         }
 
-        internal CancelSm(PDUHeader header)
+        internal CancelSm(PduHeader header)
             : base(header)
         {
-            vDestinationAddress = new SmppAddress();
+            _vDestinationAddress = new SmppAddress();
         }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.ESME; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Esme;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transmitter; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transmitter;
 
-        public SmppAddress DestionationAddress
-        {
-            get { return vDestinationAddress; }
-        }
+        public SmppAddress DestionationAddress => _vDestinationAddress;
+
         #endregion
 
         #region Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
-            PDUHeader header = new PDUHeader(CommandType.CancelSmResp, vHeader.SequenceNumber);
+            PduHeader header = new PduHeader(CommandType.CancelSmResp, VHeader.SequenceNumber);
             return new CancelSmResp(header);
         }
 
         protected override byte[] GetBodyData()
         {
             ByteBuffer buffer = new ByteBuffer(64);
-            buffer.Append(EncodeCString(vMessageID));
-            buffer.Append(vSourceAddress.GetBytes());
-            buffer.Append(vDestinationAddress.GetBytes());
+            buffer.Append(EncodeCString(VMessageId));
+            buffer.Append(VSourceAddress.GetBytes());
+            buffer.Append(_vDestinationAddress.GetBytes());
             return buffer.ToBytes();
         }
 
         protected override void Parse(ByteBuffer buffer)
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
-            vMessageID = DecodeCString(buffer);
-            vSourceAddress = SmppAddress.Parse(buffer);
-            vDestinationAddress = SmppAddress.Parse(buffer);
+            VMessageId = DecodeCString(buffer);
+            VSourceAddress = SmppAddress.Parse(buffer);
+            _vDestinationAddress = SmppAddress.Parse(buffer);
             //If this pdu has no option parameters
             //If there is still something in the buffer, we then have more than required bytes
             if (buffer.Length > 0) { throw new TooManyBytesException(); }

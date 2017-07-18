@@ -14,15 +14,11 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib
 {
     public enum InterfaceVersion : uint
     {
-        v33 = 0x33,
-        v34 = 0x34
+        V33 = 0x33,
+        V34 = 0x34
     }
 }

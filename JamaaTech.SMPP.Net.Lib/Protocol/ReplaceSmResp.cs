@@ -14,30 +14,20 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class ReplaceSmResp : GenericResponsePDU
+    public sealed class ReplaceSmResp : GenericResponsePdu
     {
         #region Constructors
-        internal ReplaceSmResp(PDUHeader header)
+        internal ReplaceSmResp(PduHeader header)
             : base(header) { }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.SMSC; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Smsc;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transmitter; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transmitter;
+
         #endregion
     }
 }

@@ -15,44 +15,35 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Util;
 using JamaaTech.Smpp.Net.Lib.Protocol.Tlv;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class BindResponse : ResponsePDU
+    public class BindResponse : ResponsePdu
     {
         #region Variables
-        private string vSystemID;
+        private string _vSystemId;
         #endregion
 
         #region Constructors
-        internal BindResponse(PDUHeader header)
+        internal BindResponse(PduHeader header)
             : base(header)
         {
-            vSystemID = "";
+            _vSystemId = "";
         }
         #endregion
 
         #region Properties
 
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.SMSC; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Smsc;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Open; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Open;
 
-        public string SystemID
+        public string SystemId
         {
-            get { return vSystemID; }
-            set { vSystemID = value; }
+            get { return _vSystemId; }
+            set { _vSystemId = value; }
         }
 
         #endregion
@@ -60,7 +51,7 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         #region Methods
         protected override byte[] GetBodyData()
         {
-            return EncodeCString(vSystemID);
+            return EncodeCString(_vSystemId);
         }
 
         protected override void Parse(ByteBuffer buffer)
@@ -69,10 +60,10 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             //If Error code is not zero, buffer.Length may be zero
             //This may happen because the SMSC may not return the system_id field
             //if the origianl bind request contained an error.
-            if (Header.ErrorCode != SmppErrorCode.ESME_ROK && buffer.Length == 0) { vSystemID = ""; return; }
+            if (Header.ErrorCode != SmppErrorCode.EsmeRok && buffer.Length == 0) { _vSystemId = ""; return; }
             //Otherwise, there must be something in the buffer
-            vSystemID = DecodeCString(buffer);
-            if (buffer.Length > 0) { vTlv = TlvCollection.Parse(buffer); }
+            _vSystemId = DecodeCString(buffer);
+            if (buffer.Length > 0) { VTlv = TlvCollection.Parse(buffer); }
         }
         #endregion
     }

@@ -14,31 +14,20 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class UnbindResp : GenericResponsePDU
+    public class UnbindResp : GenericResponsePdu
     {
         #region Constructors
-        internal UnbindResp(PDUHeader header)
+        internal UnbindResp(PduHeader header)
             : base(header) { }
         #endregion
 
         #region Properties
 
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.Any; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Any;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transceiver; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transceiver;
 
         #endregion
     }

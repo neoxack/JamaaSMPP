@@ -14,22 +14,18 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib
 {
     public enum NumberingPlanIndicator : byte
     {
         Unknown = 0,
-        ISDN = 1,
+        Isdn = 1,
         Data = 3,
         Telex = 4,
         LandMobile = 6,
         National = 8,
         Private = 9,
-        ERMES = 10,
+        Ermes = 10,
         Internet = 14,
         WapClient = 18
     }

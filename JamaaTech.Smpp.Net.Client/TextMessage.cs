@@ -25,8 +25,8 @@ namespace Jamaa.Smpp.Net.Client
     public class TextMessage : ShortMessage
     {
         #region Variables
-        private string vText;
-        private int vMaxMessageLength;
+        private string _vText;
+        private int _vMaxMessageLength;
         #endregion
 
         #region Constuctors
@@ -34,15 +34,14 @@ namespace Jamaa.Smpp.Net.Client
         /// Initializes a new instance of <see cref="TextMessage"/>
         /// </summary>
         public TextMessage()
-            : base()
         {
-            vText = "";
+            _vText = "";
         }
 
         internal TextMessage(int segmentId, int messageCount, int sequenceNumber)
             : base(segmentId, messageCount, sequenceNumber)
         {
-            vText = "";
+            _vText = "";
         }
         #endregion
 
@@ -52,32 +51,33 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public string Text
         {
-            get { return vText; }
-            set { vText = value; }
+            get { return _vText; }
+            set { _vText = value; }
         }
-        public int MaxMessageLength { get { return vMaxMessageLength; } }
+        public int MaxMessageLength => _vMaxMessageLength;
+
         #endregion
 
         #region Methods
-        protected override IEnumerable<SendSmPDU> GetPDUs(DataCoding defaultEncoding)
+        protected override IEnumerable<SendSmPdu> GetPdUs(DataCoding defaultEncoding)
         {
             SubmitSm sm = new SubmitSm();
-            sm.SourceAddress.Address = vSourceAddress;
-            sm.DestinationAddress.Address = vDestinatinoAddress; // Urgh, typo :(
+            sm.SourceAddress.Address = VSourceAddress;
+            sm.DestinationAddress.Address = VDestinatinoAddress; // Urgh, typo :(
             sm.DataCoding = defaultEncoding;
-            if (vRegisterDeliveryNotification)
+            if (VRegisterDeliveryNotification)
                 sm.RegisteredDelivery = RegisteredDelivery.DeliveryReceipt;
 
-            vMaxMessageLength = GetMaxMessageLength(defaultEncoding, false);
-            byte[] bytes = SMPPEncodingUtil.GetBytesFromString(vText, defaultEncoding);
+            _vMaxMessageLength = GetMaxMessageLength(defaultEncoding, false);
+            byte[] bytes = SmppEncodingUtil.GetBytesFromString(_vText, defaultEncoding);
 
             // Unicode encoding return 2 items for 1 char 
             // We check vText Length first
-            if (vText.Length > vMaxMessageLength && bytes.Length > vMaxMessageLength) // Split into multiple!
+            if (_vText.Length > _vMaxMessageLength && bytes.Length > _vMaxMessageLength) // Split into multiple!
             {
                 var segId = new Random().Next(1000, 9999); // create random SegmentID
-                vMaxMessageLength = GetMaxMessageLength(defaultEncoding, true);
-                var messages = Split(vText, vMaxMessageLength);
+                _vMaxMessageLength = GetMaxMessageLength(defaultEncoding, true);
+                var messages = Split(_vText, _vMaxMessageLength);
                 var totalSegments = messages.Count; // get the number of (how many) parts
                 var udh = new Udh(segId, totalSegments, 0); // ID, Total, part
 
@@ -115,13 +115,13 @@ namespace Jamaa.Smpp.Net.Client
         {
             switch (encoding)
             {
-                case DataCoding.SMSCDefault:
+                case DataCoding.SmscDefault:
                     return includeUdh ? 153 : 160;
                 case DataCoding.Latin1:
                     return includeUdh ? 134 : 140;
-                case DataCoding.ASCII:
+                case DataCoding.Ascii:
                     return includeUdh ? 153 : 160;
-                case DataCoding.UCS2:
+                case DataCoding.Ucs2:
                     return includeUdh ? 67 : 70;
                 default:
                     throw new InvalidOperationException("Invalid or unsuported encoding for text message ");
@@ -132,7 +132,7 @@ namespace Jamaa.Smpp.Net.Client
         #region Overriden System.Object Members
         public override string ToString()
         {
-            return vText == null ? "" : vText;
+            return _vText == null ? "" : _vText;
         }
         #endregion
     }

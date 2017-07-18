@@ -26,18 +26,18 @@ namespace Jamaa.Smpp.Net.Client
     public class SmppConnectionProperties
     {
         #region Variables
-        private string vSystemID;
-        private string vPassword;
-        private string vHost;
-        private int vPort;
-        private InterfaceVersion vInterfaceVersion;
-        private TypeOfNumber vAddressTon;
-        private NumberingPlanIndicator vAddressNpi;
-        private DataCoding vDefaultEncoding;
-        private string vDefaultServiceType;
-        private string vSystemType;
-        private object vSyncRoot;
-        private string vSourceAddress;
+        private string _vSystemId;
+        private string _vPassword;
+        private string _vHost;
+        private int _vPort;
+        private InterfaceVersion _vInterfaceVersion;
+        private TypeOfNumber _vAddressTon;
+        private NumberingPlanIndicator _vAddressNpi;
+        private DataCoding _vDefaultEncoding;
+        private string _vDefaultServiceType;
+        private string _vSystemType;
+        private readonly object _vSyncRoot;
+        private string _vSourceAddress;
         #endregion
 
         #region Constructors
@@ -46,16 +46,16 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public SmppConnectionProperties()
         {
-            vSystemID = "";
-            vPassword = "";
-            vHost = "";
-            vAddressTon = TypeOfNumber.International;
-            vAddressNpi = NumberingPlanIndicator.ISDN;
-            vInterfaceVersion = InterfaceVersion.v34;
-            vSystemType = "";
-            vDefaultServiceType = "";
-            SmscID = "";
-            vSyncRoot = new object();
+            _vSystemId = "";
+            _vPassword = "";
+            _vHost = "";
+            _vAddressTon = TypeOfNumber.International;
+            _vAddressNpi = NumberingPlanIndicator.Isdn;
+            _vInterfaceVersion = InterfaceVersion.V34;
+            _vSystemType = "";
+            _vDefaultServiceType = "";
+            SmscId = "";
+            _vSyncRoot = new object();
         }
         #endregion
 
@@ -63,10 +63,10 @@ namespace Jamaa.Smpp.Net.Client
         /// <summary>
         /// Gets or sets the system id that identifies this client to the SMPP server
         /// </summary>
-        public string SystemID
+        public string SystemId
         {
-            get { return vSystemID; }
-            set { vSystemID = value; }
+            get { return _vSystemId; }
+            set { _vSystemId = value; }
         }
 
         /// <summary>
@@ -74,8 +74,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public string Password
         {
-            get { return vPassword; }
-            set { vPassword = value; }
+            get { return _vPassword; }
+            set { _vPassword = value; }
         }
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public string Host
         {
-            get { return vHost; }
-            set { vHost = value; }
+            get { return _vHost; }
+            set { _vHost = value; }
         }
 
         /// <summary>
@@ -92,8 +92,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public int Port
         {
-            get { return vPort; }
-            set { vPort = value; }
+            get { return _vPort; }
+            set { _vPort = value; }
         }
 
         /// <summary>
@@ -101,8 +101,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public InterfaceVersion InterfaceVersion
         {
-            get { return vInterfaceVersion; }
-            set { vInterfaceVersion = value; }
+            get { return _vInterfaceVersion; }
+            set { _vInterfaceVersion = value; }
         }
 
         /// <summary>
@@ -110,8 +110,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public NumberingPlanIndicator AddressNpi
         {
-            get { return vAddressNpi; }
-            set { vAddressNpi = value; }
+            get { return _vAddressNpi; }
+            set { _vAddressNpi = value; }
         }
 
         /// <summary>
@@ -119,8 +119,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public TypeOfNumber AddressTon
         {
-            get { return vAddressTon; }
-            set { vAddressTon = value; }
+            get { return _vAddressTon; }
+            set { _vAddressTon = value; }
         }
 
         /// <summary>
@@ -128,8 +128,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public DataCoding DefaultEncoding
         {
-            get { return vDefaultEncoding; }
-            set { vDefaultEncoding = value; }
+            get { return _vDefaultEncoding; }
+            set { _vDefaultEncoding = value; }
         }
 
         /// <summary>
@@ -137,8 +137,8 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public string DefaultServiceType
         {
-            get { return vDefaultServiceType; }
-            set { vDefaultServiceType = value; }
+            get { return _vDefaultServiceType; }
+            set { _vDefaultServiceType = value; }
         }
 
         /// <summary>
@@ -146,30 +146,27 @@ namespace Jamaa.Smpp.Net.Client
         /// </summary>
         public string SystemType
         {
-            get { return vSystemType; }
-            set { vSystemType = value; }
+            get { return _vSystemType; }
+            set { _vSystemType = value; }
         }
 
         /// <summary>
         /// Gets the ID or the Short Message Service Center (SMSC)
         /// </summary>
-        public string SmscID { internal set; get; }
+        public string SmscId { internal set; get; }
 
         /// <summary>
         /// Gets an object that can be used for locking in a multi-threaded environment
         /// </summary>
-        public object SyncRoot
-        {
-            get { return vSyncRoot; }
-        }
+        public object SyncRoot => _vSyncRoot;
 
         /// <summary>
         /// Gets or sets the default source address when sending messages
         /// </summary>
         public string SourceAddress
         {
-            get { return vSourceAddress; }
-            set { vSourceAddress = value; }
+            get { return _vSourceAddress; }
+            set { _vSourceAddress = value; }
         }
         #endregion
 
@@ -177,14 +174,14 @@ namespace Jamaa.Smpp.Net.Client
         internal SessionBindInfo GetBindInfo()
         {
             SessionBindInfo bindInfo = new SessionBindInfo();
-            bindInfo.SystemID = vSystemID;
-            bindInfo.Password = vPassword;
-            bindInfo.ServerName = vHost;
-            bindInfo.Port = vPort;
-            bindInfo.InterfaceVersion = vInterfaceVersion;
-            bindInfo.AddressTon = vAddressTon;
-            bindInfo.AddressNpi = vAddressNpi;
-            bindInfo.SystemType = vSystemType;
+            bindInfo.SystemId = _vSystemId;
+            bindInfo.Password = _vPassword;
+            bindInfo.ServerName = _vHost;
+            bindInfo.Port = _vPort;
+            bindInfo.InterfaceVersion = _vInterfaceVersion;
+            bindInfo.AddressTon = _vAddressTon;
+            bindInfo.AddressNpi = _vAddressNpi;
+            bindInfo.SystemType = _vSystemType;
             return bindInfo;
         }
         #endregion

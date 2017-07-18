@@ -15,8 +15,6 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 
 namespace JamaaTech.Smpp.Net.Lib
@@ -25,99 +23,99 @@ namespace JamaaTech.Smpp.Net.Lib
     public class SessionBindInfo
     {
         #region Variables
-        private string vHost;
-        private int vPort;
-        private string vSystemID;
-        private string vPassword;
-        private string vSystemType;
-        private InterfaceVersion vInterfaceVersion;
-        private bool vAllowReceive;
-        private bool vAllowTransmit;
-        private TypeOfNumber vAddressTon;
-        private NumberingPlanIndicator vAddressNpi;
+        private string _vHost;
+        private int _vPort;
+        private string _vSystemId;
+        private string _vPassword;
+        private string _vSystemType;
+        private InterfaceVersion _vInterfaceVersion;
+        private bool _vAllowReceive;
+        private bool _vAllowTransmit;
+        private TypeOfNumber _vAddressTon;
+        private NumberingPlanIndicator _vAddressNpi;
         #endregion
 
         #region Constructors
         public SessionBindInfo()
         {
-            vHost = "";
-            vSystemID = "";
-            vPassword = "";
-            vSystemType = "";
-            vInterfaceVersion = InterfaceVersion.v34;
-            vAllowReceive = true;
-            vAllowTransmit = true;
-            vAddressTon = TypeOfNumber.International;
-            vAddressNpi = NumberingPlanIndicator.ISDN;
+            _vHost = "";
+            _vSystemId = "";
+            _vPassword = "";
+            _vSystemType = "";
+            _vInterfaceVersion = InterfaceVersion.V34;
+            _vAllowReceive = true;
+            _vAllowTransmit = true;
+            _vAddressTon = TypeOfNumber.International;
+            _vAddressNpi = NumberingPlanIndicator.Isdn;
         }
 
         public SessionBindInfo(string systemId, string password)
             :this()
         {
-            vSystemID = systemId;
-            vPassword = password;
+            _vSystemId = systemId;
+            _vPassword = password;
         }
         #endregion
 
         #region Properties
         public string ServerName
         {
-            get { return vHost; }
-            set { vHost = value; }
+            get { return _vHost; }
+            set { _vHost = value; }
         }
 
         public int Port
         {
-            get { return vPort; }
-            set { vPort = value; }
+            get { return _vPort; }
+            set { _vPort = value; }
         }
 
         public InterfaceVersion InterfaceVersion
         {
-            get { return vInterfaceVersion; }
-            set { vInterfaceVersion = value; }
+            get { return _vInterfaceVersion; }
+            set { _vInterfaceVersion = value; }
         }
 
-        public string SystemID
+        public string SystemId
         {
-            get { return vSystemID; }
-            set { vSystemID = value; }
+            get { return _vSystemId; }
+            set { _vSystemId = value; }
         }
 
         public string Password
         {
-            get { return vPassword; }
-            set { vPassword = value; }
+            get { return _vPassword; }
+            set { _vPassword = value; }
         }
 
         public string SystemType
         {
-            get { return vSystemType; }
-            set { vSystemType = value; }
+            get { return _vSystemType; }
+            set { _vSystemType = value; }
         }
 
         public NumberingPlanIndicator AddressNpi
         {
-            get { return vAddressNpi; }
-            set { vAddressNpi = value; }
+            get { return _vAddressNpi; }
+            set { _vAddressNpi = value; }
         }
 
         public TypeOfNumber AddressTon
         {
-            get { return vAddressTon; }
-            set { vAddressTon = value; }
+            get { return _vAddressTon; }
+            set { _vAddressTon = value; }
         }
 
         public bool AllowReceive
         {
-            get { return vAllowReceive; }
-            set { vAllowReceive = value; }
+            get { return _vAllowReceive; }
+            set { _vAllowReceive = value; }
         }
 
         public bool AllowTransmit
         {
-            get { return vAllowTransmit; }
-            set { vAllowTransmit = value; }
+            get { return _vAllowTransmit; }
+            set { _vAllowTransmit = value; }
         }
         #endregion
 
@@ -125,20 +123,20 @@ namespace JamaaTech.Smpp.Net.Lib
         internal BindRequest CreatePdu()
         {
             BindRequest req = CreateBindBdu();
-            req.AddressNpi = vAddressNpi;
-            req.AddressTon = vAddressTon;
-            req.SystemID = vSystemID;
-            req.Password = vPassword;
-            req.SystemType = vSystemType;
-            req.InterfaceVersion = vInterfaceVersion == InterfaceVersion.v33 ? (byte)0x33 : (byte)0x34;
+            req.AddressNpi = _vAddressNpi;
+            req.AddressTon = _vAddressTon;
+            req.SystemId = _vSystemId;
+            req.Password = _vPassword;
+            req.SystemType = _vSystemType;
+            req.InterfaceVersion = _vInterfaceVersion == InterfaceVersion.V33 ? (byte)0x33 : (byte)0x34;
             return req;
         }
 
         private BindRequest CreateBindBdu()
         {
-            if (vAllowReceive && vAllowTransmit) { return new BindTransceiver(); }
-            else if (vAllowTransmit) { return new BindTransmitter(); }
-            else if (vAllowReceive) { return new BindReceiver(); }
+            if (_vAllowReceive && _vAllowTransmit) { return new BindTransceiver(); }
+            else if (_vAllowTransmit) { return new BindTransmitter(); }
+            else if (_vAllowReceive) { return new BindReceiver(); }
             else { throw new InvalidOperationException("Both AllowTransmit and AllowReceive cannot be set to false"); }
         }
         #endregion

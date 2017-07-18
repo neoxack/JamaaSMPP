@@ -15,39 +15,35 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
     public class SmppException : Exception
     {
         #region Variables
-        private SmppErrorCode vErrorCode;
+        private readonly SmppErrorCode _vErrorCode;
         #endregion
 
         #region Constructors
         public SmppException(SmppErrorCode errorCode)
-            : base() { vErrorCode = errorCode; }
+            : base() { _vErrorCode = errorCode; }
 
         public SmppException(SmppErrorCode errorCode, string message)
-            : base(message) { vErrorCode = errorCode; }
+            : base(message) { _vErrorCode = errorCode; }
 
         public SmppException(SmppErrorCode errorCode, string message, Exception innerException)
-            : base(message, innerException) { vErrorCode = errorCode; }
+            : base(message, innerException) { _vErrorCode = errorCode; }
         #endregion
 
         #region Properties
-        public SmppErrorCode ErrorCode
-        {
-            get { return vErrorCode; }
-        }
+        public SmppErrorCode ErrorCode => _vErrorCode;
+
         #endregion
 
         #region Methods
         internal static void WrapAndThrow(Exception exception)
         {
-            SmppException smppEx = new SmppException(SmppErrorCode.ESME_RUNKNOWNERR, exception.Message, exception);
+            SmppException smppEx = new SmppException(SmppErrorCode.EsmeRunknownerr, exception.Message, exception);
             throw smppEx;
         }
         #endregion

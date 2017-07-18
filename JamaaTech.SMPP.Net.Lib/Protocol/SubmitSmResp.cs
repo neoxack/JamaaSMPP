@@ -15,49 +15,40 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class SubmitSmResp : ResponsePDU
+    public sealed class SubmitSmResp : ResponsePdu
     {
         #region Variables
-        private string vMessageID;
+        private string _vMessageId;
         #endregion
 
         #region Constructors
-        internal SubmitSmResp(PDUHeader header)
+        internal SubmitSmResp(PduHeader header)
             : base(header)
         {
-            vMessageID = "";
+            _vMessageId = "";
         }
         #endregion
 
         #region properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.SMSC; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Smsc;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transmitter; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transmitter;
 
-        public string MessageID
+        public string MessageId
         {
-            get { return vMessageID; }
-            set { vMessageID = value; }
+            get { return _vMessageId; }
+            set { _vMessageId = value; }
         }
         #endregion
 
         #region Methods
         protected override byte[] GetBodyData()
         {
-            return EncodeCString(vMessageID);
+            return EncodeCString(_vMessageId);
         }
 
         protected override void Parse(ByteBuffer buffer)
@@ -66,7 +57,7 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             //Note that the body part may have not been returned by
             //the SMSC if the command status is not 0
             if (buffer.Length == 0) { return; }
-            vMessageID = DecodeCString(buffer);
+            _vMessageId = DecodeCString(buffer);
             //This pdu has no optional parameters,
             //after preceding statements, the buffer must remain with no data
             if (buffer.Length > 0) { throw new TooManyBytesException(); }

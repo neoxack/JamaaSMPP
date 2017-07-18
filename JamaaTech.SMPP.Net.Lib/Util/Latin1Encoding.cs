@@ -14,8 +14,6 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace JamaaTech.Smpp.Net.Lib.Util
@@ -23,25 +21,25 @@ namespace JamaaTech.Smpp.Net.Lib.Util
     public static class Latin1Encoding
     {
         #region Variables
-        private static System.Text.Encoding vEncoding;
+        private static readonly Encoding _vEncoding;
         #endregion
 
         #region Type Initializer
         static Latin1Encoding()
         {
-            vEncoding = System.Text.Encoding.GetEncoding(28591/*"iso-8859-1"*/); //Latin 1 encoding
+            _vEncoding = Encoding.GetEncoding(28591/*"iso-8859-1"*/); //Latin 1 encoding
         }
         #endregion
 
         #region Methods
         public static byte[] GetBytes(string str)
         {
-            return vEncoding.GetBytes(str);
+            return _vEncoding.GetBytes(str);
         }
 
         public static string GetString(byte[] bytes)
         {
-            return vEncoding.GetString(bytes);
+            return _vEncoding.GetString(bytes);
         }
         #endregion
     }

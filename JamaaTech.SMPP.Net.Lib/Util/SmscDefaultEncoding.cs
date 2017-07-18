@@ -15,21 +15,20 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace JamaaTech.Smpp.Net.Lib.Util
 {
-    public static class SMSCDefaultEncoding
+    public static class SmscDefaultEncoding
     {
         #region Variables
-        private static char[] vDefaultForwardTable;
-        private static byte[] vDefaultReverseTable;
+        private static char[] _vDefaultForwardTable;
+        private static byte[] _vDefaultReverseTable;
         //private static char[] vExtensionTable;
         #endregion
 
         #region Type Initializer
-        static SMSCDefaultEncoding()
+        static SmscDefaultEncoding()
         {
             BuildTable();
         }
@@ -43,7 +42,7 @@ namespace JamaaTech.Smpp.Net.Lib.Util
             foreach (char @char in str) //For each charactor in the string
             {
                 byte @byte = (byte)@char; //Get its Latin1 byte order index
-                byte index = vDefaultReverseTable[@byte]; //Get its SMSC Default byte order index
+                byte index = _vDefaultReverseTable[@byte]; //Get its SMSC Default byte order index
                 if (index == 128) //This charactor does not exist in the table
                 {
                     //Check this charactor in the extension table
@@ -70,17 +69,17 @@ namespace JamaaTech.Smpp.Net.Lib.Util
                     //Check if there is any charactor next to this
                     if (index + 1 < bytes.Length)
                     {
-                        char @extChar = GetExtendedChar(bytes[index + 1]);
-                        if (@extChar != '\0') //This charactor was escaped by the sequence 0x1b
+                        char extChar = GetExtendedChar(bytes[index + 1]);
+                        if (extChar != '\0') //This charactor was escaped by the sequence 0x1b
                         {
-                            builder.Append(@extChar);
+                            builder.Append(extChar);
                             //Move to next charactor
                             index++;
                             continue; //Start over so that we don't read this byte more than once
                         }
                     }
                 }
-                char @char = vDefaultForwardTable[@byte]; //Get charactor corresponding to this index
+                char @char = _vDefaultForwardTable[@byte]; //Get charactor corresponding to this index
                 builder.Append(@char); //Append to string
             }
             return builder.ToString();
@@ -90,7 +89,7 @@ namespace JamaaTech.Smpp.Net.Lib.Util
         {
             //Please note that, charactors from 0x10 to 0x1B are not supported by this implementation
             //Instead, they are converted to a space charactor (0x20)
-            vDefaultForwardTable = new char[]
+            _vDefaultForwardTable = new[]
             {
                 /*    0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 ,  8 , 8 , 10 , 11, 12, 13, 14, 15 */
                 /*0*/'@','£','$','¥','è','é','ù','ì', 'ò','Ç','\n','Ø','ø','\r','Å','å',
@@ -104,17 +103,16 @@ namespace JamaaTech.Smpp.Net.Lib.Util
             };
 
             //This table is used for reverse lookup
-            vDefaultReverseTable = new byte[byte.MaxValue];
-            string chars = new string(vDefaultForwardTable, 0, vDefaultForwardTable.Length);
+            _vDefaultReverseTable = new byte[byte.MaxValue];
             int index = 0;
             for (; index < byte.MaxValue; ++index)
             {
-                vDefaultReverseTable[index] = 128;
+                _vDefaultReverseTable[index] = 128;
             }
             
-            for (index = 0; index < vDefaultForwardTable.Length; ++index)
+            for (index = 0; index < _vDefaultForwardTable.Length; ++index)
             {
-                vDefaultReverseTable[vDefaultForwardTable[index]] = (byte)index;
+                _vDefaultReverseTable[_vDefaultForwardTable[index]] = (byte)index;
             }
         }
 

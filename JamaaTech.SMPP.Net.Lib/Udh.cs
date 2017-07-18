@@ -15,8 +15,6 @@
  ************************************************************************/
 
 using System;
-using System.Text;
-using System.Collections.Generic;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib
@@ -24,49 +22,46 @@ namespace JamaaTech.Smpp.Net.Lib
     public class Udh
     {
         #region Variables
-        private int vSegmentId;
-        private int vMessageCount;
-        private int vMessageSequence;
+        private readonly int _vSegmentId;
+        private int _vMessageCount;
+        private int _vMessageSequence;
 
-        private static object vSyncRoot;
+        private static object _vSyncRoot;
         #endregion
 
         #region Constructors
         static Udh()
         {
-            vSyncRoot = new object();
+            _vSyncRoot = new object();
         }
 
         public Udh(int segmentId, int messageCount, int messageSequence)
         {
-            vSegmentId = segmentId;
-            vMessageCount = messageCount;
-            vMessageSequence = messageSequence;
+            _vSegmentId = segmentId;
+            _vMessageCount = messageCount;
+            _vMessageSequence = messageSequence;
         }
 
         public Udh(int segmentid, int messageCount)
         {
-            vSegmentId = segmentid;
-            vMessageCount = messageCount;
+            _vSegmentId = segmentid;
+            _vMessageCount = messageCount;
         }
         #endregion
 
         #region Properties
-        public int SegmentID
-        {
-            get { return vSegmentId; }
-        }
+        public int SegmentId => _vSegmentId;
 
         public int MessageCount
         {
-            get { return vMessageCount; }
-            set { vMessageCount = value; }
+            get { return _vMessageCount; }
+            set { _vMessageCount = value; }
         }
 
         public int MessageSequence
         {
-            get { return vMessageSequence; }
-            set { vMessageSequence = value; }
+            get { return _vMessageSequence; }
+            set { _vMessageSequence = value; }
         }
         #endregion
 
@@ -75,7 +70,7 @@ namespace JamaaTech.Smpp.Net.Lib
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
             //There must be at least 3 bytes for UDHL, IEI, IEDL
-            if (buffer.Length < 3) { throw new SmppException(SmppErrorCode.ESME_RUNKNOWNERR, "Invalid UDH field"); }
+            if (buffer.Length < 3) { throw new SmppException(SmppErrorCode.EsmeRunknownerr, "Invalid UDH field"); }
             int length = buffer.Remove(); //UDH Length
             int iei = buffer.Remove(); //Information element identifier
             int ieidl = buffer.Remove(); //Information element identifier data length
@@ -90,7 +85,7 @@ namespace JamaaTech.Smpp.Net.Lib
             int seq = 0;
             //--
             //Confirm that we have enough bytes as indicated by the UDHL
-            if (buffer.Length < ieidl) { throw new SmppException(SmppErrorCode.ESME_RUNKNOWNERR, "Invalid UDH field"); }
+            if (buffer.Length < ieidl) { throw new SmppException(SmppErrorCode.EsmeRunknownerr, "Invalid UDH field"); }
             if (length == 5 && iei == 0 && ieidl == 3) //8 bits message reference
             {
                 segId = buffer.Remove();
@@ -99,11 +94,11 @@ namespace JamaaTech.Smpp.Net.Lib
             }
             else if (length == 6 && iei == 8 && ieidl == 4) //16 bits message reference
             {
-                segId = SMPPEncodingUtil.GetShortFromBytes(buffer.Remove(2));
+                segId = SmppEncodingUtil.GetShortFromBytes(buffer.Remove(2));
                 count = buffer.Remove();
                 seq = buffer.Remove();
             }
-            else { throw new SmppException(SmppErrorCode.ESME_RUNKNOWNERR, "Invalid or unsupported UDH field"); }
+            else { throw new SmppException(SmppErrorCode.EsmeRunknownerr, "Invalid or unsupported UDH field"); }
             Udh udh = new Udh(segId, count, seq);
             return udh;
         }
@@ -114,9 +109,9 @@ namespace JamaaTech.Smpp.Net.Lib
             buffer.Append(0x05); //User 8 bits reference number
             buffer.Append(0x00); //IEI = 0 concatenated message
             buffer.Append(0x03); //Three bytes follow
-            buffer.Append((byte)vSegmentId);
-            buffer.Append((byte)vMessageCount);
-            buffer.Append((byte)vMessageSequence);
+            buffer.Append((byte)_vSegmentId);
+            buffer.Append((byte)_vMessageCount);
+            buffer.Append((byte)_vMessageSequence);
             return buffer.ToBytes();
         }
 

@@ -15,50 +15,42 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 using JamaaTech.Smpp.Net.Lib.Protocol.Tlv;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class DataSmResp : ResponsePDU
+    public sealed class DataSmResp : ResponsePdu
     {
         #region Variables
-        private string vMessageID;
+        private string _vMessageId;
         #endregion
 
         #region Constructors
-        internal DataSmResp(PDUHeader header)
+        internal DataSmResp(PduHeader header)
             : base(header)
         {
-            vMessageID = "";
+            _vMessageId = "";
         }
         #endregion
 
         #region Properties
-        public string MessageID
+        public string MessageId
         {
-            get { return vMessageID; }
-            set { vMessageID = value; }
+            get { return _vMessageId; }
+            set { _vMessageId = value; }
         }
 
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.Any; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Any;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transceiver; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transceiver;
+
         #endregion
 
         #region Methods
         protected override byte[] GetBodyData()
         {
-            return EncodeCString(vMessageID);
+            return EncodeCString(_vMessageId);
         }
 
         protected override void Parse(ByteBuffer buffer)
@@ -66,8 +58,8 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
             //We require at least 1 byte for this pdu
             if (buffer.Length < 1) { throw new NotEnoughBytesException("data_sm_resp requires at least 1 byte of body data"); }
-            vMessageID = DecodeCString(buffer);
-            if (buffer.Length > 0) { vTlv = TlvCollection.Parse(buffer); }
+            _vMessageId = DecodeCString(buffer);
+            if (buffer.Length > 0) { VTlv = TlvCollection.Parse(buffer); }
         }
         #endregion
     }

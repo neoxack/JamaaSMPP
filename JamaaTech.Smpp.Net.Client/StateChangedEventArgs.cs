@@ -25,7 +25,7 @@ namespace Jamaa.Smpp.Net.Client
     {
         #region Constructors
         public StateChangedEventArgs(bool started)
-        { this.Started = started; }
+        { Started = started; }
         #endregion
 
         /// <summary>

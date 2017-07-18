@@ -15,66 +15,57 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class QuerySmResp : ResponsePDU
+    public sealed class QuerySmResp : ResponsePdu
     {
         #region Variables
-        private string vMessageID;
-        private string vFinalDate;
-        private MessageState vMessageState;
-        private byte vErrorCode;
+        private string _vMessageId;
+        private string _vFinalDate;
+        private MessageState _vMessageState;
+        private byte _vErrorCode;
         #endregion
 
         #region Constructors
-        internal QuerySmResp(PDUHeader header)
+        internal QuerySmResp(PduHeader header)
             : base(header)
         {
-            vMessageID = "";
-            vFinalDate = "";
-            vMessageState = MessageState.Unknown;
-            vErrorCode = 0;
+            _vMessageId = "";
+            _vFinalDate = "";
+            _vMessageState = MessageState.Unknown;
+            _vErrorCode = 0;
         }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.SMSC; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Smsc;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transmitter; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transmitter;
 
-        public string MessageID
+        public string MessageId
         {
-            get { return vMessageID; }
-            set { vMessageID = value; }
+            get { return _vMessageId; }
+            set { _vMessageId = value; }
         }
 
         public string FinalDate
         {
-            get { return vFinalDate; }
-            set { vFinalDate = value; }
+            get { return _vFinalDate; }
+            set { _vFinalDate = value; }
         }
 
         public MessageState MessageState
         {
-            get { return vMessageState; }
-            set { vMessageState = value; }
+            get { return _vMessageState; }
+            set { _vMessageState = value; }
         }
 
         public byte ErrorCode
         {
-            get { return vErrorCode; }
-            set { vErrorCode = value; }
+            get { return _vErrorCode; }
+            set { _vErrorCode = value; }
         }
         #endregion
 
@@ -82,20 +73,20 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         protected override byte[] GetBodyData()
         {
             ByteBuffer buffer = new ByteBuffer(16);
-            buffer.Append(EncodeCString(vMessageID));
-            buffer.Append(EncodeCString(vFinalDate));
-            buffer.Append((byte)vMessageState);
-            buffer.Append(vErrorCode);
+            buffer.Append(EncodeCString(_vMessageId));
+            buffer.Append(EncodeCString(_vFinalDate));
+            buffer.Append((byte)_vMessageState);
+            buffer.Append(_vErrorCode);
             return buffer.ToBytes();
         }
 
         protected override void Parse(ByteBuffer buffer)
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
-            vMessageID = DecodeCString(buffer);
-            vFinalDate = DecodeCString(buffer);
-            vMessageState = (MessageState)GetByte(buffer);
-            vErrorCode = GetByte(buffer);
+            _vMessageId = DecodeCString(buffer);
+            _vFinalDate = DecodeCString(buffer);
+            _vMessageState = (MessageState)GetByte(buffer);
+            _vErrorCode = GetByte(buffer);
             //This pdu has no option parameters,
             //If the buffer still contains something,
             //the we received more that required bytes

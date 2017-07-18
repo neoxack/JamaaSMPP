@@ -14,16 +14,12 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class GenericResponsePDU : ResponsePDU
+    public abstract class GenericResponsePdu : ResponsePdu
     {
         #region Constructors
-        internal GenericResponsePDU(PDUHeader header)
+        internal GenericResponsePdu(PduHeader header)
             : base(header) { }
         #endregion
 
@@ -33,7 +29,7 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             return null; 
         }
 
-        protected override void Parse(JamaaTech.Smpp.Net.Lib.Util.ByteBuffer buffer)
+        protected override void Parse(Util.ByteBuffer buffer)
         {
             if (buffer.Length > 0) { throw new TooManyBytesException(); }
         }

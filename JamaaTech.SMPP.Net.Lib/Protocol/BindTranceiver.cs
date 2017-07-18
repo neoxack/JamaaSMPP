@@ -14,19 +14,15 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
     public sealed class BindTransceiver : BindRequest
     {
         #region Constructors
         public BindTransceiver()
-            : base(new PDUHeader(CommandType.BindTransceiver)) { }
+            : base(new PduHeader(CommandType.BindTransceiver)) { }
 
-        internal BindTransceiver(PDUHeader header)
+        internal BindTransceiver(PduHeader header)
             : base(header) { }
         #endregion
     }

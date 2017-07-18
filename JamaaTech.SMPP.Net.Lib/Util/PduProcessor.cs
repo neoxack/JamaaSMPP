@@ -14,29 +14,27 @@
  *
  ************************************************************************/
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 
 namespace JamaaTech.Smpp.Net.Lib.Util
 {
-    public abstract class PduProcessor<T> : RunningComponent where T : PDU
+    public abstract class PduProcessor<T> : RunningComponent where T : Pdu
     {
         #region Variables
-        private Queue<T> vPduQueue;
-        private ManualResetEvent vWaitEvent;
+        private Queue<T> _vPduQueue;
+        private ManualResetEvent _vWaitEvent;
         #endregion
 
         #region Constants
-        private const int DEFAULT_CAPACITY = 256;
+        private const int DefaultCapacity = 256;
         #endregion
 
         #region Constructors
         public PduProcessor()
         {
-            InitializeInstance(DEFAULT_CAPACITY);
+            InitializeInstance(DefaultCapacity);
         }
 
         public PduProcessor(int defaultQueueCapacity)
@@ -49,17 +47,17 @@ namespace JamaaTech.Smpp.Net.Lib.Util
         #region Helper Methods
         private void InitializeInstance(int queueCapacity)
         {
-            vPduQueue = new Queue<T>(queueCapacity);
-            vWaitEvent = new ManualResetEvent(false); //The state is unsignaled initially
+            _vPduQueue = new Queue<T>(queueCapacity);
+            _vWaitEvent = new ManualResetEvent(false); //The state is unsignaled initially
         }
 
         private T WaitPdu()
         {
-            vWaitEvent.WaitOne();
-            lock (vPduQueue)
+            _vWaitEvent.WaitOne();
+            lock (_vPduQueue)
             {
-                T pdu = vPduQueue.Dequeue();
-                if (vPduQueue.Count == 0) { vWaitEvent.Reset(); }
+                T pdu = _vPduQueue.Dequeue();
+                if (_vPduQueue.Count == 0) { _vWaitEvent.Reset(); }
                 return pdu;
             }
         }
@@ -70,11 +68,11 @@ namespace JamaaTech.Smpp.Net.Lib.Util
 
         internal void ProcessPdu(T pdu)
         {
-            lock (vPduQueue)
+            lock (_vPduQueue)
             {
                 if (!Running) { return; }
-                vPduQueue.Enqueue(pdu);
-                vWaitEvent.Set();
+                _vPduQueue.Enqueue(pdu);
+                _vWaitEvent.Set();
             }
         }
 

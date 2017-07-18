@@ -15,33 +15,28 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class PDUException : Exception
+    public class PduException : Exception
     {
         #region Variables
-        private SmppErrorCode vErrorCode;
+        private readonly SmppErrorCode _vErrorCode;
         #endregion
 
         #region Constructors
-        public PDUException(SmppErrorCode errorCode) { vErrorCode = errorCode; }
+        public PduException(SmppErrorCode errorCode) { _vErrorCode = errorCode; }
 
-        public PDUException(SmppErrorCode errorCode, string message)
-            : base(message) { vErrorCode = errorCode; }
+        public PduException(SmppErrorCode errorCode, string message)
+            : base(message) { _vErrorCode = errorCode; }
 
-        public PDUException(SmppErrorCode errorCode, string message, Exception innerException)
-            : base(message, innerException) { vErrorCode = errorCode; }
+        public PduException(SmppErrorCode errorCode, string message, Exception innerException)
+            : base(message, innerException) { _vErrorCode = errorCode; }
         #endregion
 
         #region Properties
-        public SmppErrorCode ErrorCode
-        {
-            get { return vErrorCode; }
-        }
+        public SmppErrorCode ErrorCode => _vErrorCode;
+
         #endregion
     }
 }

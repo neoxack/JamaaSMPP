@@ -14,28 +14,22 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class RequestPDU : PDU
+    public abstract class RequestPdu : Pdu
     {
         #region Constructors
-        internal RequestPDU(PDUHeader header)
+        internal RequestPdu(PduHeader header)
             : base(header) { }
         #endregion
 
         #region Properties
-        public virtual bool HasResponse
-        {
-            get { return true; }
-        }
+        public virtual bool HasResponse => true;
+
         #endregion
 
         #region Methods
-        public abstract ResponsePDU CreateDefaultResponce();
+        public abstract ResponsePdu CreateDefaultResponce();
         #endregion
     }
 }

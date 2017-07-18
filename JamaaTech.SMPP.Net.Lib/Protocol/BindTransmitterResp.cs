@@ -14,16 +14,12 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
     public sealed class BindTransmitterResp :BindResponse
     {
         #region Constructors
-        public BindTransmitterResp(PDUHeader header)
+        public BindTransmitterResp(PduHeader header)
             : base(header) { }
         #endregion
     }

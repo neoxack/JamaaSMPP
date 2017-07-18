@@ -15,66 +15,57 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Util;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class Outbind : RequestPDU
+    public class Outbind : RequestPdu
     {
         #region Variables
-        private string vSystemID;
-        private string vPassword;
+        private string _vSystemId;
+        private string _vPassword;
         #endregion
 
         #region Constructors
-        internal Outbind(PDUHeader header)
+        internal Outbind(PduHeader header)
             : base(header)
         {
-            vSystemID = "";
-            vPassword = "";
+            _vSystemId = "";
+            _vPassword = "";
         }
         #endregion
 
         #region Properties
 
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.SMSC; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Smsc;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Open; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Open;
 
-        public string SystemID
+        public string SystemId
         {
-            get { return vSystemID; }
-            set { vSystemID = value; }
+            get { return _vSystemId; }
+            set { _vSystemId = value; }
         }
 
         public string Password
         {
-            get { return vPassword; }
-            set { vPassword = value; }
+            get { return _vPassword; }
+            set { _vPassword = value; }
         }
         #endregion
 
         #region Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
-            PDUHeader header = new PDUHeader(CommandType.BindTransceiver, vHeader.SequenceNumber);
+            PduHeader header = new PduHeader(CommandType.BindTransceiver, VHeader.SequenceNumber);
             return new BindTransceiverResp(header);
         }
 
         protected override byte[] GetBodyData()
         {
-            ByteBuffer buffer = new ByteBuffer(vSystemID.Length + vPassword.Length + 2);
-            buffer.Append(EncodeCString(vSystemID));
-            buffer.Equals(EncodeCString(vPassword));
+            ByteBuffer buffer = new ByteBuffer(_vSystemId.Length + _vPassword.Length + 2);
+            buffer.Append(EncodeCString(_vSystemId));
+            buffer.Equals(EncodeCString(_vPassword));
             return buffer.ToBytes();
         }
 
@@ -83,8 +74,8 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
             //Outbind PDU requires at least 2 bytes
             if (buffer.Length < 2) { throw new NotEnoughBytesException("Outbind PDU requires at least 2 bytes for body data"); }
-            vSystemID = DecodeCString(buffer);
-            vPassword = DecodeCString(buffer);
+            _vSystemId = DecodeCString(buffer);
+            _vPassword = DecodeCString(buffer);
             //This PDU has no optional parameters
             //If we still have something in the buffer, we are having more bytes than we expected
             if (buffer.Length > 0) { throw new TooManyBytesException(); }

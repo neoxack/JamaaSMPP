@@ -15,120 +15,112 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Util;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class PDUHeader
+    public sealed class PduHeader
     {
         #region Variables
-        private CommandType vCommandType;
-        private uint vCommandLength;
-        private SmppErrorCode vErrorCode;
-        private uint vSequenceNumber;
+        private readonly CommandType _vCommandType;
+        private uint _vCommandLength;
+        private SmppErrorCode _vErrorCode;
+        private readonly uint _vSequenceNumber;
 
-        private static uint vNextSequenceNumber;
-        private static object vSyncRoot;
+        private static uint _vNextSequenceNumber;
+        private static readonly object _vSyncRoot;
         #endregion
 
         #region Constructors
-        static PDUHeader()
+        static PduHeader()
         {
-            vSyncRoot = new object();
-            vNextSequenceNumber = 1;
+            _vSyncRoot = new object();
+            _vNextSequenceNumber = 1;
         }
 
-        public PDUHeader(CommandType cmdType)
+        public PduHeader(CommandType cmdType)
             : this(cmdType, GetNextSequenceNumber()) 
         {
-            vCommandLength = 16;
+            _vCommandLength = 16;
         }
 
-        public PDUHeader(CommandType cmdType, uint seqNumber)
+        public PduHeader(CommandType cmdType, uint seqNumber)
         {
-            vCommandType = cmdType;
-            vSequenceNumber = seqNumber;
-            vCommandLength = 16;
+            _vCommandType = cmdType;
+            _vSequenceNumber = seqNumber;
+            _vCommandLength = 16;
         }
 
-        public PDUHeader(CommandType cmdType, uint seqNumber, SmppErrorCode errorCode)
+        public PduHeader(CommandType cmdType, uint seqNumber, SmppErrorCode errorCode)
             :this(cmdType,seqNumber)
         {
-            vErrorCode = errorCode;
-            vCommandLength = 16;
+            _vErrorCode = errorCode;
+            _vCommandLength = 16;
         }
 
-        public PDUHeader(CommandType cmdType, uint seqNumber, SmppErrorCode errorCode, uint cmdLength)
+        public PduHeader(CommandType cmdType, uint seqNumber, SmppErrorCode errorCode, uint cmdLength)
             :this(cmdType,seqNumber,errorCode)
         {
-            vCommandLength = cmdLength;
+            _vCommandLength = cmdLength;
         }
         #endregion
 
         #region Properties
-        public CommandType CommandType
-        {
-            get { return vCommandType; }
-        }
+        public CommandType CommandType => _vCommandType;
 
         public uint CommandLength
         {
-            get { return vCommandLength; }
-            set { vCommandLength = value; }
+            get { return _vCommandLength; }
+            set { _vCommandLength = value; }
         }
 
         public SmppErrorCode ErrorCode
         {
-            get { return vErrorCode; }
-            set { vErrorCode = value; }
+            get { return _vErrorCode; }
+            set { _vErrorCode = value; }
         }
 
-        public uint SequenceNumber
-        {
-            get { return vSequenceNumber; }
-        }
+        public uint SequenceNumber => _vSequenceNumber;
+
         #endregion
 
         #region Methods
-        public static PDUHeader Parse(ByteBuffer buffer)
+        public static PduHeader Parse(ByteBuffer buffer)
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
             if (buffer.Length < 16) { throw new ArgumentException("Buffer length must not be less than 16 bytes"); }
-            uint cmdLength = SMPPEncodingUtil.GetIntFromBytes(buffer.Remove(4));
-            CommandType cmdType = (CommandType)SMPPEncodingUtil.GetIntFromBytes(buffer.Remove(4));
-            SmppErrorCode errorCode = (SmppErrorCode)SMPPEncodingUtil.GetIntFromBytes(buffer.Remove(4));
-            uint seqNumber = SMPPEncodingUtil.GetIntFromBytes(buffer.Remove(4));
-            PDUHeader header = new PDUHeader(cmdType, seqNumber, errorCode, cmdLength);
+            uint cmdLength = SmppEncodingUtil.GetIntFromBytes(buffer.Remove(4));
+            CommandType cmdType = (CommandType)SmppEncodingUtil.GetIntFromBytes(buffer.Remove(4));
+            SmppErrorCode errorCode = (SmppErrorCode)SmppEncodingUtil.GetIntFromBytes(buffer.Remove(4));
+            uint seqNumber = SmppEncodingUtil.GetIntFromBytes(buffer.Remove(4));
+            PduHeader header = new PduHeader(cmdType, seqNumber, errorCode, cmdLength);
             return header;
         }
 
         public byte[] GetBytes()
         {
             ByteBuffer buffer = new ByteBuffer(32);
-            buffer.Append(SMPPEncodingUtil.GetBytesFromInt(vCommandLength));
-            buffer.Append(SMPPEncodingUtil.GetBytesFromInt((uint)vCommandType));
-            buffer.Append(SMPPEncodingUtil.GetBytesFromInt((uint)vErrorCode));
-            buffer.Append(SMPPEncodingUtil.GetBytesFromInt(vSequenceNumber));
+            buffer.Append(SmppEncodingUtil.GetBytesFromInt(_vCommandLength));
+            buffer.Append(SmppEncodingUtil.GetBytesFromInt((uint)_vCommandType));
+            buffer.Append(SmppEncodingUtil.GetBytesFromInt((uint)_vErrorCode));
+            buffer.Append(SmppEncodingUtil.GetBytesFromInt(_vSequenceNumber));
             return buffer.ToBytes();
         }
 
         public static uint GetNextSequenceNumber()
         {
-            lock (vSyncRoot)
+            lock (_vSyncRoot)
             {
-                uint seqNumber = vNextSequenceNumber;
-                if (vNextSequenceNumber == uint.MaxValue) { vNextSequenceNumber = 1; }
-                else { vNextSequenceNumber++; }
+                uint seqNumber = _vNextSequenceNumber;
+                if (_vNextSequenceNumber == uint.MaxValue) { _vNextSequenceNumber = 1; }
+                else { _vNextSequenceNumber++; }
                 return seqNumber;
             }
         }
 
         public override string ToString()
         {
-            return vCommandType.ToString();
+            return _vCommandType.ToString();
         }
         #endregion
     }

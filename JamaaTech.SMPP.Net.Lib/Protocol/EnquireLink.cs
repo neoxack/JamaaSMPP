@@ -14,45 +14,35 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class EnquireLink : GenericRequestPDU
+    public class EnquireLink : GenericRequestPdu
     {
         #region Constuctors
-        internal EnquireLink(PDUHeader header)
+        internal EnquireLink(PduHeader header)
             : base(header) { }
 
         public EnquireLink()
-            :base(new PDUHeader(CommandType.EnquireLink))
+            :base(new PduHeader(CommandType.EnquireLink))
         {
         }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.Any; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Any;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transceiver; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transceiver;
+
         #endregion
 
         #region Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
-            PDUHeader header = new PDUHeader(CommandType.EnquireLinkResp, vHeader.SequenceNumber);
+            PduHeader header = new PduHeader(CommandType.EnquireLinkResp, VHeader.SequenceNumber);
             //use default Status and Length
             //header.CommandStatus = 0;
             //header.CommandLength = 16;
-            EnquireLinkResp resp = (EnquireLinkResp)CreatePDU(header);
+            EnquireLinkResp resp = (EnquireLinkResp)CreatePdu(header);
             return resp;
         }
         #endregion

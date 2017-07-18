@@ -14,9 +14,6 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
@@ -24,44 +21,44 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
     public sealed class SmppAddress
     {
         #region Variables
-        private TypeOfNumber vTon;
-        private NumberingPlanIndicator vNpi;
-        private string vAddress;
+        private TypeOfNumber _vTon;
+        private NumberingPlanIndicator _vNpi;
+        private string _vAddress;
         #endregion
 
         #region Constructors
         public SmppAddress()
         {
-            vTon = TypeOfNumber.International;
-            vNpi = NumberingPlanIndicator.ISDN;
-            vAddress = "";
+            _vTon = TypeOfNumber.International;
+            _vNpi = NumberingPlanIndicator.Isdn;
+            _vAddress = "";
         }
 
         public SmppAddress(TypeOfNumber ton, NumberingPlanIndicator npi, string address)
         {
-            vTon = ton;
-            vNpi = npi;
-            vAddress = address;
+            _vTon = ton;
+            _vNpi = npi;
+            _vAddress = address;
         }
         #endregion
 
         #region Properties
         public TypeOfNumber Ton
         {
-            get { return vTon; }
-            set { vTon = value; }
+            get { return _vTon; }
+            set { _vTon = value; }
         }
 
         public NumberingPlanIndicator Npi
         {
-            get { return vNpi; }
-            set { vNpi = value; }
+            get { return _vNpi; }
+            set { _vNpi = value; }
         }
 
         public string Address
         {
-            get { return vAddress; }
-            set { vAddress = value; }
+            get { return _vAddress; }
+            set { _vAddress = value; }
         }
         #endregion
 
@@ -70,20 +67,20 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         {
             //We require at least 3 bytes for SMPPAddress instance to be craeted
             if (buffer.Length < 3) { throw new NotEnoughBytesException("SMPPAddress requires at least 3 bytes"); }
-            TypeOfNumber ton = (TypeOfNumber)PDU.GetByte(buffer);
-            NumberingPlanIndicator npi = (NumberingPlanIndicator)PDU.GetByte(buffer);
-            string address = PDU.DecodeCString(buffer);
+            TypeOfNumber ton = (TypeOfNumber)Pdu.GetByte(buffer);
+            NumberingPlanIndicator npi = (NumberingPlanIndicator)Pdu.GetByte(buffer);
+            string address = Pdu.DecodeCString(buffer);
             return new SmppAddress(ton, npi, address);
         }
 
         public byte[] GetBytes()
         {
             //Approximate buffer required;
-            int capacity = 4 + vAddress == null ? 1 : vAddress.Length;
+            int capacity = 4 + _vAddress == null ? 1 : _vAddress.Length;
             ByteBuffer buffer = new ByteBuffer(capacity);
-            buffer.Append((byte)vTon);
-            buffer.Append((byte)vNpi);
-            buffer.Append(PDU.EncodeCString(vAddress));
+            buffer.Append((byte)_vTon);
+            buffer.Append((byte)_vNpi);
+            buffer.Append(Pdu.EncodeCString(_vAddress));
             return buffer.ToBytes();
         }
         #endregion

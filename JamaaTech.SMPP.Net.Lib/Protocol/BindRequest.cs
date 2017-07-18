@@ -15,100 +15,91 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Util;
-using JamaaTech.Smpp.Net.Lib;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class BindRequest : RequestPDU
+    public abstract class BindRequest : RequestPdu
     {
         #region Variables
-        private string vSystemID;
-        private string vPassword;
-        private string vSystemType;
-        private TypeOfNumber vAddressTon;
-        private NumberingPlanIndicator vAddressNpi;
-        private byte vInterfaceVersion;
-        private string vAddressRange;
+        private string _vSystemId;
+        private string _vPassword;
+        private string _vSystemType;
+        private TypeOfNumber _vAddressTon;
+        private NumberingPlanIndicator _vAddressNpi;
+        private byte _vInterfaceVersion;
+        private string _vAddressRange;
         #endregion
 
         #region Constructors
-        internal BindRequest(PDUHeader header)
+        internal BindRequest(PduHeader header)
             : base(header) 
         {
-            vSystemID = "";
-            vPassword = "";
-            vSystemType = "";
-            vAddressTon = TypeOfNumber.International; //International
-            vAddressNpi = NumberingPlanIndicator.ISDN; //ISDN
-            vInterfaceVersion = 34; //SMPP 3.4 version
-            vAddressRange = "";
+            _vSystemId = "";
+            _vPassword = "";
+            _vSystemType = "";
+            _vAddressTon = TypeOfNumber.International; //International
+            _vAddressNpi = NumberingPlanIndicator.Isdn; //ISDN
+            _vInterfaceVersion = 34; //SMPP 3.4 version
+            _vAddressRange = "";
         }
         #endregion
 
         #region Properties
 
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.ESME; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Esme;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Open; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Open;
 
-        public string SystemID
+        public string SystemId
         {
-            get { return vSystemID; }
-            set { vSystemID = value; }
+            get { return _vSystemId; }
+            set { _vSystemId = value; }
         }
 
         public string Password
         {
-            get { return vPassword; }
-            set { vPassword = value; }
+            get { return _vPassword; }
+            set { _vPassword = value; }
         }
 
         public string SystemType
         {
-            get { return vSystemType; }
-            set { vSystemType = value; }
+            get { return _vSystemType; }
+            set { _vSystemType = value; }
         }
 
         public TypeOfNumber AddressTon
         {
-            get { return vAddressTon; }
-            set { vAddressTon = value; }
+            get { return _vAddressTon; }
+            set { _vAddressTon = value; }
         }
 
         public NumberingPlanIndicator AddressNpi
         {
-            get { return vAddressNpi; }
-            set { vAddressNpi = value; }
+            get { return _vAddressNpi; }
+            set { _vAddressNpi = value; }
         }
 
         public byte InterfaceVersion
         {
-            get { return vInterfaceVersion; }
-            set { vInterfaceVersion = value; }
+            get { return _vInterfaceVersion; }
+            set { _vInterfaceVersion = value; }
         }
 
         public string AddressRange
         {
-            get { return vAddressRange; }
-            set { vAddressRange = value; }
+            get { return _vAddressRange; }
+            set { _vAddressRange = value; }
         }
         #endregion
 
         #region Methods
         #region Interface Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
             CommandType cmdType = CommandType.BindTransceiverResp;
-            switch (vHeader.CommandType)
+            switch (VHeader.CommandType)
             {
                 case CommandType.BindReceiver:
                     cmdType = CommandType.BindReceiverResp;
@@ -117,20 +108,20 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
                     cmdType = CommandType.BindTransmitterResp;
                     break;
             }
-            PDUHeader header = new PDUHeader(cmdType, vHeader.SequenceNumber);
-            return (BindResponse)CreatePDU(header);
+            PduHeader header = new PduHeader(cmdType, VHeader.SequenceNumber);
+            return (BindResponse)CreatePdu(header);
         }
 
         protected override byte[] GetBodyData()
         {
             ByteBuffer buffer = new ByteBuffer(32);
-            buffer.Append(EncodeCString(vSystemID));
-            buffer.Append(EncodeCString(vPassword));
-            buffer.Append(EncodeCString(vSystemType));
-            buffer.Append(vInterfaceVersion);
-            buffer.Append((byte)vAddressTon);
-            buffer.Append((byte)vAddressNpi);
-            buffer.Append(EncodeCString(vAddressRange));
+            buffer.Append(EncodeCString(_vSystemId));
+            buffer.Append(EncodeCString(_vPassword));
+            buffer.Append(EncodeCString(_vSystemType));
+            buffer.Append(_vInterfaceVersion);
+            buffer.Append((byte)_vAddressTon);
+            buffer.Append((byte)_vAddressNpi);
+            buffer.Append(EncodeCString(_vAddressRange));
             return buffer.ToBytes();
         }
 
@@ -141,13 +132,13 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             if (buffer.Length < minBytes) { throw new NotEnoughBytesException("BindRequest requires at least 7 bytes for body parameters"); }
             try
             {
-                vSystemID = DecodeCString(buffer);
-                vPassword = DecodeCString(buffer);
-                vSystemType = DecodeCString(buffer);
-                vInterfaceVersion = GetByte(buffer);
-                vAddressTon = (TypeOfNumber)GetByte(buffer);
-                vAddressNpi = (NumberingPlanIndicator)GetByte(buffer);
-                vAddressRange = DecodeCString(buffer);
+                _vSystemId = DecodeCString(buffer);
+                _vPassword = DecodeCString(buffer);
+                _vSystemType = DecodeCString(buffer);
+                _vInterfaceVersion = GetByte(buffer);
+                _vAddressTon = (TypeOfNumber)GetByte(buffer);
+                _vAddressNpi = (NumberingPlanIndicator)GetByte(buffer);
+                _vAddressRange = DecodeCString(buffer);
             }
             catch (InvalidOperationException ex)
             {

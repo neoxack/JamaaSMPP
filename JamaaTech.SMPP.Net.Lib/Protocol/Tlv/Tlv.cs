@@ -15,8 +15,6 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol.Tlv
@@ -24,16 +22,16 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol.Tlv
     public class Tlv
     {
         #region Variables
-        private Tag vTag;
-        private ushort vLength;
-        private byte[] vRawValue;
+        private readonly Tag _vTag;
+        private ushort _vLength;
+        private byte[] _vRawValue;
         #endregion
 
         #region Constructors
         public Tlv(Tag tag, ushort length)
         {
-            vTag = tag;
-            vLength = length;
+            _vTag = tag;
+            _vLength = length;
         }
 
         public Tlv(Tag tag, ushort length, byte[] value)
@@ -44,32 +42,27 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol.Tlv
         #endregion
 
         #region Properties
-        public Tag Tag
-        {
-            get { return vTag; }
-        }
+        public Tag Tag => _vTag;
 
         public ushort Length
         {
-            get { return vLength; }
-            set { vLength = value; }
+            get { return _vLength; }
+            set { _vLength = value; }
         }
 
-        public byte[] RawValue
-        {
-            get { return vRawValue; }
-        }
+        public byte[] RawValue => _vRawValue;
+
         #endregion
 
         #region Methods
         public virtual byte[] GetBytes()
         {
-            if (vRawValue == null || vRawValue.Length != vLength) 
+            if (_vRawValue == null || _vRawValue.Length != _vLength) 
             { throw new TlvException("Tlv value length inconsistent with length field or has no data set"); }
-            ByteBuffer buffer = new ByteBuffer(vLength + 4); //Reserve enough capacity for tag, length and value fields
-            buffer.Append(SMPPEncodingUtil.GetBytesFromShort((ushort)vTag));
-            buffer.Append(SMPPEncodingUtil.GetBytesFromShort(vLength));
-            buffer.Append(vRawValue);
+            ByteBuffer buffer = new ByteBuffer(_vLength + 4); //Reserve enough capacity for tag, length and value fields
+            buffer.Append(SmppEncodingUtil.GetBytesFromShort((ushort)_vTag));
+            buffer.Append(SmppEncodingUtil.GetBytesFromShort(_vLength));
+            buffer.Append(_vRawValue);
             return buffer.ToBytes();
         }
 
@@ -77,8 +70,8 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol.Tlv
         {
             //Buffer must have at least 4 bytes for tag and length plus at least one byte for the value field
             if (buffer.Length < 5) { throw new TlvException("Tlv required at least 5 bytes"); }
-            Tag tag = (Tag)SMPPEncodingUtil.GetShortFromBytes(buffer.Remove(2));
-            ushort len = SMPPEncodingUtil.GetShortFromBytes(buffer.Remove(2));
+            Tag tag = (Tag)SmppEncodingUtil.GetShortFromBytes(buffer.Remove(2));
+            ushort len = SmppEncodingUtil.GetShortFromBytes(buffer.Remove(2));
             Tlv tlv = new Tlv(tag, len);
             tlv.ParseValue(buffer, len);
             return tlv;
@@ -89,8 +82,8 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol.Tlv
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
             if (buffer.Length < length) { throw new TlvException(); }
             byte[] bytes = buffer.Remove(length);
-            vRawValue = bytes;
-            vLength = length;
+            _vRawValue = bytes;
+            _vLength = length;
         }
 
         public virtual void ParseValue(byte[] bytes, int start, int length)
@@ -99,8 +92,8 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol.Tlv
             if (length < 1) { throw new ArgumentException("Invalid length", "length"); }
             byte[] tempBytes = new byte[length];
             Array.Copy(bytes, start, tempBytes, 0, length);
-            vRawValue = tempBytes;
-            vLength = (ushort)length;
+            _vRawValue = tempBytes;
+            _vLength = (ushort)length;
         }
 
         public void ParseValue(byte[] bytes)

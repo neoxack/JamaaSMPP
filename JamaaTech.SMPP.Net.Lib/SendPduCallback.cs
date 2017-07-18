@@ -14,12 +14,9 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
-    internal delegate ResponsePDU SendPduCallback(RequestPDU pdu, int timeout);
+    internal delegate ResponsePdu SendPduCallback(RequestPdu pdu, int timeout);
 }

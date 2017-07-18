@@ -15,8 +15,6 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
@@ -24,13 +22,13 @@ namespace JamaaTech.Smpp.Net.Lib
     {
         #region Constructors
         internal SmppBindException()
-            : base(SmppErrorCode.ESME_RBINDFAIL, "Bind operation failed") { }
+            : base(SmppErrorCode.EsmeRbindfail, "Bind operation failed") { }
 
         internal SmppBindException(SmppErrorCode errorCode)
             : base(errorCode, "Bind operation failed") { }
 
         internal SmppBindException(Exception innerException)
-            : base(SmppErrorCode.ESME_RBINDFAIL, "Bind operation failed", innerException) { }
+            : base(SmppErrorCode.EsmeRbindfail, "Bind operation failed", innerException) { }
         #endregion
 
         #region Methods

@@ -14,18 +14,13 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class PDUFormatException : PDUException
+    public class PduFormatException : PduException
     {
         #region Constructors
-        public PDUFormatException(string message)
-            : base(SmppErrorCode.ESME_RINVPARLEN, message) { }
+        public PduFormatException(string message)
+            : base(SmppErrorCode.EsmeRinvparlen, message) { }
         #endregion
     }
 }

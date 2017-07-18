@@ -14,16 +14,12 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class ResponsePDU : PDU
+    public abstract class ResponsePdu : Pdu
     {
         #region Constructors
-        internal ResponsePDU(PDUHeader header)
+        internal ResponsePdu(PduHeader header)
             : base(header) { }
         #endregion
     }

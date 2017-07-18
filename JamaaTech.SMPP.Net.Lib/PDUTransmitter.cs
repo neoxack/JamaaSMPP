@@ -15,33 +15,31 @@
  ************************************************************************/
 
 using System;
-using System.Text;
-using System.Collections.Generic;
 using JamaaTech.Smpp.Net.Lib.Protocol;
 using JamaaTech.Smpp.Net.Lib.Networking;
 
 namespace JamaaTech.Smpp.Net.Lib
 {
-    public class PDUTransmitter
+    public class PduTransmitter
     {
         #region Variables
-        private TcpIpSession vTcpIpSession;
+        private readonly TcpIpSession _vTcpIpSession;
         #endregion
 
         #region Constructors
-        public PDUTransmitter(TcpIpSession session)
+        public PduTransmitter(TcpIpSession session)
         {
             if (session == null) { throw new ArgumentNullException("session"); }
-            vTcpIpSession = session;
+            _vTcpIpSession = session;
         }
         #endregion
 
         #region Methods
-        public void Send(PDU pdu)
+        public void Send(Pdu pdu)
         {
             if (pdu == null) { throw new ArgumentNullException("pdu"); }
             byte[] bytesToSend = pdu.GetBytes();
-            vTcpIpSession.Send(bytesToSend);
+            _vTcpIpSession.Send(bytesToSend);
         }
         #endregion
     }

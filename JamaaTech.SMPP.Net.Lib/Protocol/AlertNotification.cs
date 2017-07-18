@@ -15,66 +15,52 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 using JamaaTech.Smpp.Net.Lib.Protocol.Tlv;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public class AlertNotification : SmPDU
+    public class AlertNotification : SmPdu
     {
         #region Variables
-        private SmppAddress vEsmeAddress;
+        private SmppAddress _vEsmeAddress;
         #endregion
 
         #region Constructors
         public AlertNotification()
-            : base(new PDUHeader(CommandType.AlertNotification))
+            : base(new PduHeader(CommandType.AlertNotification))
         {
-            vEsmeAddress = new SmppAddress();
+            _vEsmeAddress = new SmppAddress();
         }
 
-        internal AlertNotification(PDUHeader header)
+        internal AlertNotification(PduHeader header)
             : base(header)
         {
-            vEsmeAddress = new SmppAddress();
+            _vEsmeAddress = new SmppAddress();
         }
         #endregion
 
         #region Properties
-        public override bool HasResponse
-        {
-            get { return false; }
-        }
+        public override bool HasResponse => false;
 
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.SMSC; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Smsc;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Receiver; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Receiver;
 
-        public SmppAddress ESMEAddress
-        {
-            get { return vEsmeAddress; }
-        }
+        public SmppAddress EsmeAddress => _vEsmeAddress;
+
         #endregion
 
         #region Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
             return null;
         }
 
         protected override byte[] GetBodyData()
         {
-            byte[] sourceAddrBytes = vSourceAddress.GetBytes();
-            byte[] esmeAddresBytes = vEsmeAddress.GetBytes();
+            byte[] sourceAddrBytes = VSourceAddress.GetBytes();
+            byte[] esmeAddresBytes = _vEsmeAddress.GetBytes();
             ByteBuffer buffer = new ByteBuffer(sourceAddrBytes.Length + esmeAddresBytes.Length);
             buffer.Append(sourceAddrBytes);
             buffer.Append(esmeAddresBytes);
@@ -84,11 +70,11 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         protected override void Parse(ByteBuffer buffer)
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
-            vSourceAddress = SmppAddress.Parse(buffer);
-            vEsmeAddress = SmppAddress.Parse(buffer);
+            VSourceAddress = SmppAddress.Parse(buffer);
+            _vEsmeAddress = SmppAddress.Parse(buffer);
             //If there are some bytes left,
             //construct a tlv collection
-            if (buffer.Length > 0) { vTlv = TlvCollection.Parse(buffer); }
+            if (buffer.Length > 0) { VTlv = TlvCollection.Parse(buffer); }
         }
         #endregion
     }

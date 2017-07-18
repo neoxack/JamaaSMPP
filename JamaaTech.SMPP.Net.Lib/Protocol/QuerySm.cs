@@ -15,55 +15,47 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class QuerySm : SmOperationPDU
+    public sealed class QuerySm : SmOperationPdu
     {
         #region Constructors
         public QuerySm()
-            : base(new PDUHeader(CommandType.QuerySm)) { }
+            : base(new PduHeader(CommandType.QuerySm)) { }
 
-        internal QuerySm(PDUHeader header)
+        internal QuerySm(PduHeader header)
             : base(header) { }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.ESME; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Esme;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Transmitter; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Transmitter;
+
         #endregion
 
         #region Methods
-        public override ResponsePDU CreateDefaultResponce()
+        public override ResponsePdu CreateDefaultResponce()
         {
-            PDUHeader header = new PDUHeader(CommandType.QuerySmResp, vHeader.SequenceNumber);
+            PduHeader header = new PduHeader(CommandType.QuerySmResp, VHeader.SequenceNumber);
             return new QuerySmResp(header);
         }
 
         protected override byte[] GetBodyData()
         {
             ByteBuffer buffer = new ByteBuffer(16);
-            buffer.Append(EncodeCString(vMessageID));
-            buffer.Append(vSourceAddress.GetBytes());
+            buffer.Append(EncodeCString(VMessageId));
+            buffer.Append(VSourceAddress.GetBytes());
             return buffer.ToBytes();
         }
 
         protected override void Parse(ByteBuffer buffer)
         {
             if (buffer == null) { throw new ArgumentNullException("buffer"); }
-            vMessageID = DecodeCString(buffer);
-            vSourceAddress = SmppAddress.Parse(buffer);
+            VMessageId = DecodeCString(buffer);
+            VSourceAddress = SmppAddress.Parse(buffer);
             //This pdu has no option parameters
             //If there is still something in the buffer,
             //we then have more than required bytes

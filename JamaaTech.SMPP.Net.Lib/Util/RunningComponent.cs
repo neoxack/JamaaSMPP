@@ -14,9 +14,6 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace JamaaTech.Smpp.Net.Lib.Util
@@ -24,17 +21,17 @@ namespace JamaaTech.Smpp.Net.Lib.Util
     public abstract class RunningComponent
     {
         #region Variables
-        protected bool vRunning;
-        protected object vSyncRoot;
-        protected Thread vRunningThread;
-        private bool vStopOnNextCycle;
+        protected bool VRunning;
+        protected object VSyncRoot;
+        protected Thread VRunningThread;
+        private bool _vStopOnNextCycle;
         #endregion
 
         #region Constructors
         public RunningComponent()
         {
             //Initit vSyncRoot
-            vSyncRoot = new object();
+            VSyncRoot = new object();
             //vRunning = false; //false is the default boolean value anyway,  not need to set it
         }
 
@@ -43,7 +40,7 @@ namespace JamaaTech.Smpp.Net.Lib.Util
         #region Properties
         public bool Running
         {
-            get { lock (vSyncRoot) { return vRunning; } }
+            get { lock (VSyncRoot) { return VRunning; } }
         }
         #endregion
 
@@ -51,7 +48,7 @@ namespace JamaaTech.Smpp.Net.Lib.Util
         #region Interface Methods
         public void Start()
         {
-            lock (vSyncRoot) { if (vRunning) { return; } } //If this component is already running, do nothing
+            lock (VSyncRoot) { if (VRunning) { return; } } //If this component is already running, do nothing
             //Initialize component before running owner thread
             InitializeComponent();
             RunThread();
@@ -64,16 +61,16 @@ namespace JamaaTech.Smpp.Net.Lib.Util
 
         public void Stop(bool allowCompleteCycle)
         {
-            lock (vSyncRoot)
+            lock (VSyncRoot)
             {
-                if (!vRunning) { return; } //If this component is stopped, do nothing
-                vStopOnNextCycle = true; //Prevent running thread from continue looping
+                if (!VRunning) { return; } //If this component is stopped, do nothing
+                _vStopOnNextCycle = true; //Prevent running thread from continue looping
                 if (!allowCompleteCycle)
                 {
-                    vRunningThread.Abort(); //Abort owner thread
-                    vRunningThread.Join(); //Wait until thread abort is complete
-                    vRunning = false;
-                    vRunningThread = null;
+                    VRunningThread.Abort(); //Abort owner thread
+                    VRunningThread.Join(); //Wait until thread abort is complete
+                    VRunning = false;
+                    VRunningThread = null;
                 }
             }
         }
@@ -82,12 +79,12 @@ namespace JamaaTech.Smpp.Net.Lib.Util
 
         protected virtual void ThreadCallback()
         {
-            lock (vSyncRoot) { vRunning = true; }
+            lock (VSyncRoot) { VRunning = true; }
             RunNow();
-            lock (vSyncRoot)
+            lock (VSyncRoot)
             {
-                vRunning = false;
-                vRunningThread = null;
+                VRunning = false;
+                VRunningThread = null;
             }
         }
 
@@ -95,24 +92,24 @@ namespace JamaaTech.Smpp.Net.Lib.Util
 
         protected virtual bool CanContinue()
         {
-            lock (vSyncRoot) { return !vStopOnNextCycle; }
+            lock (VSyncRoot) { return !_vStopOnNextCycle; }
         }
 
         protected virtual void StopOnNextCycle()
         {
-            lock (vSyncRoot) { vStopOnNextCycle = true; }
+            lock (VSyncRoot) { _vStopOnNextCycle = true; }
         }
         #endregion
 
         #region Helper Methods
         private void RunThread()
         {
-            vRunningThread = new Thread(new ThreadStart(ThreadCallback));
+            VRunningThread = new Thread(new ThreadStart(ThreadCallback));
             //Make it a background thread so that it does not keep the
             //application running after the main threads exit
-            vRunningThread.IsBackground = true;
+            VRunningThread.IsBackground = true;
             //Start the thread
-            vRunningThread.Start();
+            VRunningThread.Start();
         }
         #endregion
         #endregion

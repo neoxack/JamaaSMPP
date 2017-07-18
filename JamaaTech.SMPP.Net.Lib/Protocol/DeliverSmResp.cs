@@ -14,31 +14,22 @@
  *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public sealed class DeliverSmResp : ResponsePDU
+    public sealed class DeliverSmResp : ResponsePdu
     {
         #region Constructors
-        internal DeliverSmResp(PDUHeader header)
+        internal DeliverSmResp(PduHeader header)
             : base(header) { }
         #endregion
 
         #region Properties
-        public override SmppEntityType AllowedSource
-        {
-            get { return SmppEntityType.ESME; }
-        }
+        public override SmppEntityType AllowedSource => SmppEntityType.Esme;
 
-        public override SmppSessionState AllowedSession
-        {
-            get { return SmppSessionState.Receiver; }
-        }
+        public override SmppSessionState AllowedSession => SmppSessionState.Receiver;
+
         #endregion
 
         #region Methods

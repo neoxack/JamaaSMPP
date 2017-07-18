@@ -15,59 +15,56 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using JamaaTech.Smpp.Net.Lib;
 using JamaaTech.Smpp.Net.Lib.Util;
 using System.Diagnostics;
 
 namespace JamaaTech.Smpp.Net.Lib.Protocol
 {
-    public abstract class SendSmPDU : SmPDU
+    public abstract class SendSmPdu : SmPdu
     {
         #region Variables
-        protected string vServiceType;
-        protected EsmClass vEsmClass;
-        protected RegisteredDelivery vRegisteredDelivery;
-        protected DataCoding vDataCoding;
+        protected string VServiceType;
+        protected EsmClass VEsmClass;
+        protected RegisteredDelivery VRegisteredDelivery;
+        protected DataCoding VDataCoding;
         //--
-        private static TraceSwitch vTraceSwitch = new TraceSwitch("SendSmPDUSwitch", "SendSmPDU switch");
+        private static readonly TraceSwitch _vTraceSwitch = new TraceSwitch("SendSmPDUSwitch", "SendSmPDU switch");
         #endregion
 
         #region Constructors
-        internal SendSmPDU(PDUHeader header)
+        internal SendSmPdu(PduHeader header)
             : base(header)
         {
-            vServiceType = "";
-            vEsmClass = EsmClass.Default;
-            vRegisteredDelivery = RegisteredDelivery.None;
-            vDataCoding = DataCoding.ASCII;
+            VServiceType = "";
+            VEsmClass = EsmClass.Default;
+            VRegisteredDelivery = RegisteredDelivery.None;
+            VDataCoding = DataCoding.Ascii;
         }
         #endregion
 
         #region Properties
         public string ServiceType
         {
-            get { return vServiceType; }
-            set { vServiceType = value; }
+            get { return VServiceType; }
+            set { VServiceType = value; }
         }
 
         public EsmClass EsmClass
         {
-            get { return vEsmClass; }
-            set { vEsmClass = value; }
+            get { return VEsmClass; }
+            set { VEsmClass = value; }
         }
 
         public RegisteredDelivery RegisteredDelivery
         {
-            get { return vRegisteredDelivery; }
-            set { vRegisteredDelivery = value; }
+            get { return VRegisteredDelivery; }
+            set { VRegisteredDelivery = value; }
         }
 
         public DataCoding DataCoding
         {
-            get { return vDataCoding; }
-            set { vDataCoding = value; }
+            get { return VDataCoding; }
+            set { VDataCoding = value; }
         }
         #endregion
 
@@ -95,11 +92,11 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             //Check if the UDH is set in the esm_class field
             if ((EsmClass & EsmClass.UdhiIndicator) == EsmClass.UdhiIndicator) 
             {
-                if (vTraceSwitch.TraceInfo) { Trace.WriteLine("200020:UDH field presense detected;"); }
+                if (_vTraceSwitch.TraceInfo) { Trace.WriteLine("200020:UDH field presense detected;"); }
                 try { udh = Udh.Parse(buffer); }
                 catch (Exception ex)
                 {
-                    if (vTraceSwitch.TraceError)
+                    if (_vTraceSwitch.TraceError)
                     {
                         Trace.WriteLine(string.Format(
                             "20023:UDH field parsing error - {0} {1};",
@@ -110,10 +107,10 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
             }
             //Check if we have something remaining in the buffer
             if (buffer.Length == 0) { return; }
-            try { message = SMPPEncodingUtil.GetStringFromBytes(buffer.ToBytes(), DataCoding); }
+            try { message = SmppEncodingUtil.GetStringFromBytes(buffer.ToBytes(), DataCoding); }
             catch (Exception ex1)
             {
-                if (vTraceSwitch.TraceError)
+                if (_vTraceSwitch.TraceError)
                 {
                     Trace.WriteLine(string.Format(
                         "200019:SMS message decoding failure - {0} {1};",
@@ -132,7 +129,7 @@ namespace JamaaTech.Smpp.Net.Lib.Protocol
         {
             ByteBuffer buffer = new ByteBuffer(160);
             if (udh != null) { buffer.Append(udh.GetBytes()); }
-            buffer.Append(SMPPEncodingUtil.GetBytesFromString(message, dataCoding));
+            buffer.Append(SmppEncodingUtil.GetBytesFromString(message, dataCoding));
             SetMessageBytes(buffer.ToBytes());
             if (udh != null) { EsmClass = EsmClass | EsmClass.UdhiIndicator; }
             DataCoding = dataCoding;
